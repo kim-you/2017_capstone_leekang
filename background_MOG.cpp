@@ -5,24 +5,39 @@ using namespace std;
 using namespace cv;
 
 int main(){
-	Mat src, weight, back;
-	VideoCapture capture("C:\\Users\\Administrator\\Desktop\\Study\\4학년\\공프기\\OpenCV\\traffic.mp4");
-	int key;
-	int frame_rate = 30;
 
-	BackgroundSubtractorMOG fgbg;
+	Mat src, add, back;
+	Mat canny,sobel;
+	VideoCapture capture("C:\\Users\\Administrator\\Desktop\\Study\\4학년\\공프기\\OpenCV\\TrafficExample\\traffic.mp4");
+	int key;
+	int frame_rate = 5;
+	Mat pre;
+
+	BackgroundSubtractorMOG2 fgbg;
 
 	capture >> src;
 
 	while (capture.read(src)){
-		fgbg(src, back, (0.1));
-
+		fgbg(src, back);
+		fgbg.getBackgroundImage(pre);
 		imshow("ORG", src);
-		imshow("BACK", back);
+		
+		Canny(pre, canny, 50, 100, 3);
+		
+		//imshow("BACK", back);
+		imshow("BACKGROUND", canny);
+
 
 		key = waitKey(frame_rate);
 
-		if (key == 27)
+		if (key == 32){
+			if (frame_rate == 5)
+				frame_rate = 0;
+			else if (frame_rate == 0)
+				frame_rate = 5;
+
+		}
+		else if (key == 27)
 			break;
 	}
 }

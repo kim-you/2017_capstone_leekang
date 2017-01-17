@@ -24,14 +24,14 @@ int main(){
 	int frameNum = -1;
 	int delay = 1000 / fps;
 	Mat frame, grayImage;
-	Mat avgImage, diffImage, mask;
+	Mat avgImage, diffImage, mask, canny;
 	for (;;)
 	{
 		inputVideo >> frame;
 		if (frame.empty())
 			break;
-		frameNum++;
-		cout << "frameNum: " << frameNum << endl;
+		frameNum++;	
+		//cout << "frameNum: " << frameNum << endl;
 		cvtColor(frame, grayImage, COLOR_BGR2GRAY);
 		GaussianBlur(grayImage, grayImage, Size(5, 5), 0.5);
 		if (frameNum == 0)
@@ -48,15 +48,30 @@ int main(){
 		erode(mask, mask, kernel, Point(-1, -1), 2);
 		dilate(mask, mask, kernel, Point(-1, -1), 3);
 
-		imshow("mask", mask);
+		//imshow("mask", mask);
 		bitwise_not(mask, mask);
 		accumulateWeighted(grayImage, avgImage, alpha, mask);
 
 		avgImage.convertTo(avgImage, CV_8U);
-		imshow("avgImage", avgImage);
+		//imshow("avgImage", avgImage);
 		imshow("ORIGIN", frame);
+
+		Mat canny;
+
+		Canny(avgImage, canny, 50, 100, 3);
+		imshow("Canny", canny);
+
 		int cKey = waitKey(delay);
-		if (cKey == 27) break;
+		
+		if (cKey == 32){
+			if (delay == 1000 / fps)
+				delay = 0;
+			else if (delay == 0)
+				delay = 1000 / fps;
+		}
+		
+		else if (cKey == 27) break;
+		
 	}
 	return 0;
 }
