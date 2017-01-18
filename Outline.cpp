@@ -8,13 +8,13 @@ using namespace cv;
 int main(){
 	int i = 0, count = 0;
 	double maxcontour = 0;
-	Mat src = imread("C:\\Users\\Administrator\\Desktop\\Study\\4학년\\공프기\\OpenCV\\lena.png", 1);
+	Mat src = imread("C:\\Users\\Administrator\\Desktop\\Study\\4학년\\공프기\\OpenCV\\Coin.jpg", 1);
 	Mat range, canny, copy, origin;
 	int locate[100][100];
 	int x = 0, y = 0;
 	int nBlue = 0, nGreen = 0, nRed = 0;
 	int min_Blue = 256, min_Green = 256, min_Red = 256;
-	int max_Blue = -1, max_Green = -1, max_Red = -1;
+
 	if (!src.data){
 		printf("NO IMAGE\n");
 		return -1;
@@ -45,27 +45,20 @@ int main(){
 
 	}
 	
-	drawContours(src, contours, count, Scalar(93, 85, 199), CV_FILLED, 8, hierarchy);
+	drawContours(src, contours, count, Scalar(0, 0, 255), CV_FILLED, 8, hierarchy);
 	
 	for (x = 0; x<src.rows; x++){
 		for (y = 0; y<src.cols; y++){
 			if (src.at<cv::Vec3b>(x, y)[0] == 0 && src.at<cv::Vec3b>(x, y)[1] == 0 && src.at<cv::Vec3b>(x, y)[2] == 255){
-				if (nBlue < min_Blue && nBlue > max_Blue){
-					nBlue = origin.at<cv::Vec3b>(x - 1, y - 1)[0];
-					min_Blue = nBlue;
-				}
-				if (nGreen < min_Green){
-					nGreen = origin.at<cv::Vec3b>(x - 1, y - 1)[1];
-					min_Green = nGreen;
-				}
-				if (nRed < min_Red){
-					nRed = origin.at<cv::Vec3b>(x - 1, y - 1)[2];
-					min_Red = nRed;
-				}
+				nBlue = origin.at<cv::Vec3b>(x-1, y)[0];
+				nGreen = origin.at<cv::Vec3b>(x-1, y)[1];
+				nRed = origin.at<cv::Vec3b>(x-1, y)[2];
 			}
 		}
 	}
-	printf("Blue = %d, Green = %d, Red = %d", min_Blue, min_Green, min_Red);
+	drawContours(src, contours, count, Scalar(nBlue, nGreen, nRed), CV_FILLED, 8, hierarchy);
+
+	printf("Blue = %d, Green = %d, Red = %d", nBlue, nGreen, nRed);
 	//blur(src, normal, 3, Point(-1, 1), 3);
 	
 	imshow("NORMAL", src);
