@@ -1,5 +1,5 @@
-#include "cv.hpp" //¿©±â¿¡ ÇÊ¿äÇÑ °Å ´Ù ÀÖÀ½
-#include "opencv2/opencv.hpp" //ÀÌ·¸°Ô¸¸ ÇÏ¸é ´Ù ¶á´Ù ´Ù ¶á´Ù
+#include "cv.hpp" //ì—¬ê¸°ì— í•„ìš”í•œ ê±° ë‹¤ ìˆìŒ
+#include "opencv2/opencv.hpp" //ì´ë ‡ê²Œë§Œ í•˜ë©´ ë‹¤ ëœ¬ë‹¤ ë‹¤ ëœ¬ë‹¤
 
 using namespace cv;
 
@@ -62,9 +62,9 @@ int* FindLargestArea(Mat origin, Mat cannies){
 
 Mat nonedge_area(Mat src, float sky_rate, int window_size) {
 	/*
-	Mat src :  ¿øº» ¿µ»ó(¿¡ÁöÃ³¸®ÈÄ->2ÁøÈ­¿µ»óÀ¸·Î º¯È¯µÈ ¿µ»óÀÌ¾î¾ßÇÔ.
-	float sky_rate : ÇÏ´Ã¿¡ ÇØ´çÇÏ´Â ºñÀ² (ex/ 0.3 : »óÀ§ 30%¸¦ ¹«½ÃÇÑ´Ù)
-	int window_size : À©µµ¿ìÀÇ Å©±â : ³·À»¼ö·Ï Á¤¹ĞÇÏ°Ô °Ë»ö.
+	Mat src :  ì›ë³¸ ì˜ìƒ(ì—ì§€ì²˜ë¦¬í›„->2ì§„í™”ì˜ìƒìœ¼ë¡œ ë³€í™˜ëœ ì˜ìƒì´ì–´ì•¼í•¨.
+	float sky_rate : í•˜ëŠ˜ì— í•´ë‹¹í•˜ëŠ” ë¹„ìœ¨ (ex/ 0.3 : ìƒìœ„ 30%ë¥¼ ë¬´ì‹œí•œë‹¤)
+	int window_size : ìœˆë„ìš°ì˜ í¬ê¸° : ë‚®ì„ìˆ˜ë¡ ì •ë°€í•˜ê²Œ ê²€ìƒ‰.
 	*/
 
 	int i, i2 = 0;
@@ -120,10 +120,13 @@ Mat roadFilter(int b, int g, int r, float magnitude, const Mat&src) {
 
 	//mask
 	inRange(src, Scalar(b, g, r), Scalar(B, G, R), filter); //Threshold the image
-	dilate(filter, filter, getStructuringElement(MORPH_RECT, Size(5, 5)));
-	erode(filter, filter, getStructuringElement(MORPH_RECT, Size(5, 5)));
-	erode(filter, filter, getStructuringElement(MORPH_RECT, Size(5, 5)));
-	dilate(filter, filter, getStructuringElement(MORPH_RECT, Size(5, 5)));
+	
+	erode(filter, filter, getStructuringElement(MORPH_RECT, Size(10, 10)));
+	erode(filter, filter, getStructuringElement(MORPH_RECT, Size(10, 10)));
+	dilate(filter, filter, getStructuringElement(MORPH_RECT, Size(10, 10)));
+	dilate(filter, filter, getStructuringElement(MORPH_RECT, Size(10, 10)));
+	erode(filter, filter, getStructuringElement(MORPH_RECT, Size(10, 10)));
+	dilate(filter, filter, getStructuringElement(MORPH_RECT, Size(10, 10)));
 	
 	int* bgr = (int*)malloc(3);
 	
