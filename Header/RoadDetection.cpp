@@ -1,21 +1,31 @@
-#include "cv.hpp" //Ïó¨Í∏∞Ïóê ÌïÑÏöîÌïú Í±∞ Îã§ ÏûàÏùå
-#include "opencv2/opencv.hpp" //Ïù¥Î†áÍ≤åÎßå ÌïòÎ©¥ Îã§ Îú¨Îã§ Îã§ Îú¨Îã§
+/*
+2017 ¿Ã∞≠±≥ºˆ¥‘ ƒ∏Ω∫≈Ê ∆¿
+CCTV øµªÛø°º≠ µµ∑Œ∏¶ ±∏«œ¥¬ «¡∑Œ±◊∑•¿« ±∏«ˆ ∫Œ∫–
+FindLargestArea -> Contour ¡ﬂ ∞°¿Â ≈´ ∏È¿˚¿ª ¬˜¡ˆ«œ¥¬ Contour∏¶ ±∏«œ¥¬ «¡∑Œ±◊∑•.
+nonedge_area -> øß¡ˆ∞° æ¯¥¬ ∫Œ∫–¿ª ±∏«ÿ n*n ¿« mask∑Œ æ∫øÏ¥¬ «¡∑Œ±◊∑•
+roadFilter -> ∆Ø¡§«— Scalar ∞™¿ª ¡÷∏È float ∞™¿« ø¿¬˜π¸¿ß ≥ªø° ¿÷¥¬ Scalar ∞™¿∏∑Œ « ≈Õ∏µ
+Normalization -> øµªÛ¿ª Lab øµªÛ¿∏∑Œ πŸ≤Ÿ∞Ì π‡±‚ ∞™¿ª ∆Ú»∞»≠ «ÿ¡÷¥¬ «¡∑Œ±◊∑•.
+*/
+
+
+#include "cv.hpp" //ø©±‚ø° « ø‰«— ∞≈ ¥Ÿ ¿÷¿Ω
+#include "opencv2/opencv.hpp" //¿Ã∑∏∞‘∏∏ «œ∏È ¥Ÿ ∂·¥Ÿ ¥Ÿ ∂·¥Ÿ
 
 using namespace cv;
 
-int* bgr = (int*)malloc(3);
+int counts_number = 1;
 
-int* FindLargestArea(Mat origin, Mat cannies){
+Mat FindLargestArea(Mat origin, Mat cannies){
 	Mat src;
-
+	Mat source;
 	int i = 0, count = 0;
 	int x = 0, y = 0;
 	int nBlue = 0, nGreen = 0, nRed = 0;
 
 	double maxcontour = 0;
-
+/*
 	for (i = 0; i < 3; i++)
-		bgr[i] = 0;
+		bgr[i] = 0;*/
 
 	vector<vector<Point>> contours;
 	vector<Vec4i>hierarchy;
@@ -27,8 +37,7 @@ int* FindLargestArea(Mat origin, Mat cannies){
 		, CV_CHAIN_APPROX_SIMPLE);
 
 	for (i = 0; i < contours.size(); i++){
-		//
-		printf("%d = %lf\n", i, contourArea(contours[i]));
+		//		printf("%d = %lf\n", i, contourArea(contours[i]));
 
 		if (contourArea(contours[i])>maxcontour){
 			maxcontour = contourArea(contours[i]);
@@ -36,9 +45,11 @@ int* FindLargestArea(Mat origin, Mat cannies){
 		}
 
 	}
-
-	drawContours(origin, contours, count, Scalar(0, 0, 255), CV_FILLED, 8, hierarchy);
-
+	source = origin.clone();
+	cvtColor(source, source, CV_RGB2GRAY);
+	source = Scalar(0);
+	drawContours(source, contours, count, Scalar(255), CV_FILLED, 8, hierarchy);
+	/*
 	for (x = 0; x<origin.rows; x++){
 		for (y = 0; y<origin.cols; y++){
 			if (origin.at<cv::Vec3b>(x, y)[0] == 0 && origin.at<cv::Vec3b>(x, y)[1] == 0 && origin.at<cv::Vec3b>(x, y)[2] == 255){
@@ -56,15 +67,16 @@ int* FindLargestArea(Mat origin, Mat cannies){
 	//
 	printf("In Function: Blue = %d, Green = %d, Red = %d\n", bgr[0], bgr[1], bgr[2]);
 
-
-	return bgr;
+	*/
+	
+	return source;
 }
 
 Mat nonedge_area(Mat src, float sky_rate, int window_size) {
 	/*
-	Mat src :  ÏõêÎ≥∏ ÏòÅÏÉÅ(ÏóêÏßÄÏ≤òÎ¶¨ÌõÑ->2ÏßÑÌôîÏòÅÏÉÅÏúºÎ°ú Î≥ÄÌôòÎêú ÏòÅÏÉÅÏù¥Ïñ¥ÏïºÌï®.
-	float sky_rate : ÌïòÎäòÏóê Ìï¥ÎãπÌïòÎäî ÎπÑÏú® (ex/ 0.3 : ÏÉÅÏúÑ 30%Î•º Î¨¥ÏãúÌïúÎã§)
-	int window_size : ÏúàÎèÑÏö∞Ïùò ÌÅ¨Í∏∞ : ÎÇÆÏùÑÏàòÎ°ù Ï†ïÎ∞ÄÌïòÍ≤å Í≤ÄÏÉâ.
+	Mat src :  ø¯∫ª øµªÛ(ø°¡ˆ√≥∏Æ»ƒ->2¡¯»≠øµªÛ¿∏∑Œ ∫Ø»Øµ» øµªÛ¿ÃæÓæﬂ«‘.
+	float sky_rate : «œ¥√ø° «ÿ¥Á«œ¥¬ ∫Ò¿≤ (ex/ 0.3 : ªÛ¿ß 30%∏¶ π´Ω√«—¥Ÿ)
+	int window_size : ¿©µµøÏ¿« ≈©±‚ : ≥∑¿ªºˆ∑œ ¡§π–«œ∞‘ ∞Àªˆ.
 	*/
 
 	int i, i2 = 0;
@@ -107,11 +119,11 @@ Mat roadFilter(int b, int g, int r, float magnitude, const Mat&src) {
 
 	// To
 	if ((magnitude*b)>255)   B = 255;
-	else   B = magnitude * b;
-	if ((magnitude*g) > 255)   G = 255;
-	else   G = magnitude * g;
+	else   B = (magnitude) * b;
+	if (((magnitude)*g) > 255)   G = 255;
+	else   G = (magnitude) * g;
 	if ((magnitude*r) > 255) R = 255;
-	else   R = magnitude * r;
+	else   R = (magnitude) * r;
 
 	// From
 	b = b / magnitude;
@@ -120,15 +132,67 @@ Mat roadFilter(int b, int g, int r, float magnitude, const Mat&src) {
 
 	//mask
 	inRange(src, Scalar(b, g, r), Scalar(B, G, R), filter); //Threshold the image
-	
+
 	erode(filter, filter, getStructuringElement(MORPH_RECT, Size(10, 10)));
 	erode(filter, filter, getStructuringElement(MORPH_RECT, Size(10, 10)));
 	dilate(filter, filter, getStructuringElement(MORPH_RECT, Size(10, 10)));
 	dilate(filter, filter, getStructuringElement(MORPH_RECT, Size(10, 10)));
 	erode(filter, filter, getStructuringElement(MORPH_RECT, Size(10, 10)));
-	dilate(filter, filter, getStructuringElement(MORPH_RECT, Size(10, 10)));
-	
-	int* bgr = (int*)malloc(3);
-	
+	dilate(filter, filter, getStructuringElement(MORPH_RECT, Size(10, 10)));	
 	return filter;
+}
+
+Mat Normalization(Mat src){
+
+	Mat c_lab, canny;
+	int low_l = 0;
+	Scalar value;
+	vector<Mat> lab_images(3);
+
+	cvtColor(src, c_lab, CV_BGR2Lab);
+	split(c_lab, lab_images);
+
+	equalizeHist(lab_images[0], lab_images[0]);
+	
+	//printf("Light = %d\n", int(value.val[0]));
+	merge(lab_images, c_lab);
+	cvtColor(c_lab, c_lab, CV_Lab2BGR);
+
+
+
+	return c_lab;
+}
+
+void callBackFunc(int event, int x, int y, int flags, void* userdata){
+	Mat src = *(Mat*)userdata;
+	Mat src2, src3, src4;
+
+	cvtColor(src, src2, CV_BGR2Lab);
+	cvtColor(src, src3, CV_BGR2HSV);
+	//img_bgr = src;
+	cvtColor(src, src4, CV_BGR2YCrCb);
+	//cvtColor(src, img_hls, CV_BGR2HLS);
+
+	switch (event){
+	case EVENT_LBUTTONDOWN:
+
+		printf("%d : X = %d, Y = %d\n", counts_number, x, y);
+		printf("BGR Screen: Scalar[0] = %d, Scalar[1] = %d, Scalar[2] = %d\n",
+			src.at<Vec3b>(y, x)[0], src.at<Vec3b>(y, x)[1], src.at<Vec3b>(y, x)[2]);
+		printf("Lab Screen: Scalar[0] = %d, Scalar[1] = %d, Scalar[2] = %d\n",
+			src2.at<Vec3b>(y, x)[0], src2.at<Vec3b>(y, x)[1], src2.at<Vec3b>(y, x)[2]);
+		printf("HSV Screen: Scalar[0] = %d, Scalar[1] = %d, Scalar[2] = %d\n",
+			src3.at<Vec3b>(y, x)[0], src3.at<Vec3b>(y, x)[1], src3.at<Vec3b>(y, x)[2]);
+		printf("YCrCb Screen: Scalar[0] = %d, Scalar[1] = %d, Scalar[2] = %d\n",
+			src4.at<Vec3b>(y, x)[0], src4.at<Vec3b>(y, x)[1], src4.at<Vec3b>(y, x)[2]);
+		printf("-----------------------------------------------------------------\n");
+		rectangle(src, Point(x - 5, y - 5), Point(x + 5, y + 5), Scalar(0, 0, 255), 1, 8);
+		char str[200];
+		sprintf(str, "%d", counts_number);
+		putText(src, str, Point(x - 7, y -10), 1, 1, Scalar(0, 0, 255));
+		imshow("ORIGIN", src);
+		counts_number++;
+		break;
+	}
+
 }
