@@ -52,10 +52,10 @@ Mat FindLargestArea(Mat origin, Mat cannies){
 	/*
 	for (x = 0; x<origin.rows; x++){
 		for (y = 0; y<origin.cols; y++){
-			if (origin.at<cv::Vec3b>(x, y)[0] == 0 && origin.at<cv::Vec3b>(x, y)[1] == 0 && origin.at<cv::Vec3b>(x, y)[2] == 255){
-				nBlue = src.at<cv::Vec3b>(x, y - 1)[0];
-				nGreen = src.at<cv::Vec3b>(x, y - 1)[1];
-				nRed = src.at<cv::Vec3b>(x, y - 1)[2];
+			if (origin.at<cv::Vec3b>(y, x)[0] == 0 && origin.at<cv::Vec3b>(y, x)[1] == 0 && origin.at<cv::Vec3b>(y, x)[2] == 255){
+				nBlue = src.at<cv::Vec3b>(y, x - 1)[0];
+				nGreen = src.at<cv::Vec3b>(y, x - 1)[1];
+				nRed = src.at<cv::Vec3b>(y, x - 1)[2];
 			}
 		}
 	}
@@ -117,21 +117,21 @@ Mat roadFilter(int b, int g, int r, float magnitude, const Mat&src) {
 	assert(src.type() == CV_8UC3);
 	Mat filter;
 
-	// To
-	if ((magnitude*b)>255)   B = 255;
-	else   B = (magnitude) * b;
-	if (((magnitude)*g) > 255)   G = 255;
-	else   G = (magnitude) * g;
-	if ((magnitude*r) > 255) R = 255;
-	else   R = (magnitude) * r;
+	//// To
+	//if ((magnitude*b)>255)   B = 255;
+	//else   B = (magnitude) * b;
+	//if (((magnitude)*g) > 255)   G = 255;
+	//else   G = (magnitude) * g;
+	//if ((magnitude*r) > 255) R = 255;
+	//else   R = (magnitude) * r;
 
-	// From
-	b = b / magnitude;
-	g = g / magnitude;
-	r = r / magnitude;
+	//// From
+	//b = b / magnitude;
+	//g = g / magnitude;
+	//r = r / magnitude;
 
 	//mask
-	inRange(src, Scalar(b, g, r), Scalar(B, G, R), filter); //Threshold the image
+	inRange(src, Scalar(b-50, g-5, r-10), Scalar(255, g+5, r+10), filter); //Threshold the image
 
 	erode(filter, filter, getStructuringElement(MORPH_RECT, Size(10, 10)));
 	erode(filter, filter, getStructuringElement(MORPH_RECT, Size(10, 10)));
@@ -139,6 +139,7 @@ Mat roadFilter(int b, int g, int r, float magnitude, const Mat&src) {
 	dilate(filter, filter, getStructuringElement(MORPH_RECT, Size(10, 10)));
 	erode(filter, filter, getStructuringElement(MORPH_RECT, Size(10, 10)));
 	dilate(filter, filter, getStructuringElement(MORPH_RECT, Size(10, 10)));	
+	
 	return filter;
 }
 
@@ -195,4 +196,21 @@ void callBackFunc(int event, int x, int y, int flags, void* userdata){
 		break;
 	}
 
+}
+
+Mat roadFilter2(int b, int g, int r, float magnitude, const Mat&src) {
+	int B, G, R;
+	assert(src.type() == CV_8UC3);
+	Mat filter;
+	//mask
+	inRange(src, Scalar(b-70, g-70, r-70), Scalar(190, 190,190), filter); //Threshold the image
+
+	erode(filter, filter, getStructuringElement(MORPH_RECT, Size(10, 10)));
+	erode(filter, filter, getStructuringElement(MORPH_RECT, Size(10, 10)));
+	dilate(filter, filter, getStructuringElement(MORPH_RECT, Size(10, 10)));
+	dilate(filter, filter, getStructuringElement(MORPH_RECT, Size(10, 10)));
+	erode(filter, filter, getStructuringElement(MORPH_RECT, Size(10, 10)));
+	dilate(filter, filter, getStructuringElement(MORPH_RECT, Size(10, 10)));
+
+	return filter;
 }

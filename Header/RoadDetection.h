@@ -5,6 +5,7 @@ FindLargestArea -> Contour 중 가장 큰 면적을 차지하는 Contour를 구하는 프로그램.
 nonedge_area -> 엣지가 없는 부분을 구해 n*n 의 mask로 씌우는 프로그램
 roadFilter -> 특정한 Scalar 값을 주면 float 값의 오차범위 내에 있는 Scalar 값으로 필터링
 Normalization -> 영상을 Lab 영상으로 바꾸고 밝기 값을 평활화 해주는 프로그램.
+callBackFunc -> 마우스 이벤트에서 왼쪽 클릭 시, 해당하는 Color Space 표시.
 */
 
 #include "cv.hpp" //여기에 필요한 거 다 있음
@@ -16,4 +17,6 @@ Mat Normalization(Mat src);
 Mat FindLargestArea(Mat origin, Mat cannies);
 Mat nonedge_area(Mat src, float sky_rate, int window_size);
 Mat roadFilter(int b, int g, int r, float magnitude, const Mat& src);
-void callBackFunc(int event, int x, int y, int flags, void* userdata);
+Mat roadFilter2(int b, int g, int r, float magnitude, const Mat&src);
+void callBackFunc(int event, int 
+	x, int y, int flags, void* userdata);
