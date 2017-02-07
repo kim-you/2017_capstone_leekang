@@ -33,8 +33,7 @@ Mat FindLargestArea(Mat origin, Mat cannies){
 
 	src = origin.clone();
 
-	findContours(cannies, contours, hierarchy, 2
-		, CV_CHAIN_APPROX_SIMPLE);
+	findContours(cannies, contours, hierarchy, 2, CV_CHAIN_APPROX_SIMPLE);
 
 	for (i = 0; i < contours.size(); i++){
 		//		printf("%d = %lf\n", i, contourArea(contours[i]));
@@ -112,26 +111,41 @@ Mat nonedge_area(Mat src, float sky_rate, int window_size) {
 
 }
 
-Mat roadFilter(int b, int g, int r, float magnitude, const Mat&src) {
-	int B, G, R;
+Mat roadFilter(const Mat& src, double sigma, Mat mask) {
+	/* In Lab Color space, Filtering only L's value with sigma*/
+
 	assert(src.type() == CV_8UC3);
+	
 	Mat filter;
+	
+	Scalar mean;
+	Scalar dev;
+	
+	double mean_v[3];
+	double dev_v[3];
+	double sigma_v[3];
 
-	//// To
-	//if ((magnitude*b)>255)   B = 255;
-	//else   B = (magnitude) * b;
-	//if (((magnitude)*g) > 255)   G = 255;
-	//else   G = (magnitude) * g;
-	//if ((magnitude*r) > 255) R = 255;
-	//else   R = (magnitude) * r;
+	meanStdDev(src, mean, dev, mask);
 
-	//// From
-	//b = b / magnitude;
-	//g = g / magnitude;
-	//r = r / magnitude;
+	for (int i = 0; i < 3; i++)
+	sigma_v[i] = (sigma*dev.val[i]);
 
+	for (int i = 0; i < 3; i++){
+		mean_v[i] = mean.val[i];
+		dev_v[i] = dev.val[i];
+	}
 	//mask
-	inRange(src, Scalar(b-50, g-5, r-10), Scalar(255, g+5, r+10), filter); //Threshold the image
+	printf("LAB MEAN %lf %lf %lf\n", mean_v[0], mean_v[1], mean_v[2]);
+	printf("LAB DEV %lf %lf %lf\n", dev_v[0], dev_v[1], dev_v[2]);
+	printf("SIGMA %lf %lf %lf\n", sigma_v[0], sigma_v[1], sigma_v[2]);
+	
+	if ((sigma_v[1] + sigma_v[2]) <= 20){
+		sigma_v[1] = 7;
+		sigma_v[2] = 10;
+	}
+	
+	printf("SIGMA_FIX %lf %lf %lf\n", sigma_v[0], sigma_v[1], sigma_v[2]);
+	inRange(src, Scalar(mean_v[0]-70, mean_v[1]-sigma_v[1], mean_v[2]-sigma_v[2]), Scalar(255, mean_v[1]+sigma_v[1], mean_v[2]+sigma_v[2]), filter); //Threshold the image
 
 	erode(filter, filter, getStructuringElement(MORPH_RECT, Size(10, 10)));
 	erode(filter, filter, getStructuringElement(MORPH_RECT, Size(10, 10)));
@@ -142,6 +156,47 @@ Mat roadFilter(int b, int g, int r, float magnitude, const Mat&src) {
 	
 	return filter;
 }
+
+Mat roadFilter2(const Mat& src, double sigma, Mat mask) {
+	
+	/*BGR Color Space Filter with Sigma*/
+
+	assert(src.type() == CV_8UC3);
+	Mat filter;
+
+	Scalar mean;
+	Scalar dev;
+
+	double mean_v[3];
+	double dev_v[3];
+	double sigma_v[3];
+
+	meanStdDev(src, mean, dev, mask);
+	
+	for (int i = 0; i < 3;i++)
+	sigma_v[i] = (sigma*dev.val[i]);
+
+	for (int i = 0; i < 3; i++){
+		mean_v[i] = mean.val[i];
+		dev_v[i] = dev.val[i];
+	}
+	//mask
+	printf("BGR MEAN %lf %lf %lf\n", mean_v[0], mean_v[1], mean_v[2]);
+	printf("BGR DEV %lf %lf %lf\n", dev_v[0], dev_v[1], dev_v[2]);
+	printf("SIGMA %lf %lf %lf\n", sigma_v[0], sigma_v[1], sigma_v[2]);
+
+	inRange(src, Scalar(mean_v[0] - sigma_v[0], mean_v[1] - sigma_v[1], mean_v[2] - sigma_v[2]), Scalar(200, 200, 200), filter); //Threshold the image
+
+	erode(filter, filter, getStructuringElement(MORPH_RECT, Size(10, 10)));
+	erode(filter, filter, getStructuringElement(MORPH_RECT, Size(10, 10)));
+	dilate(filter, filter, getStructuringElement(MORPH_RECT, Size(10, 10)));
+	dilate(filter, filter, getStructuringElement(MORPH_RECT, Size(10, 10)));
+	erode(filter, filter, getStructuringElement(MORPH_RECT, Size(10, 10)));
+	dilate(filter, filter, getStructuringElement(MORPH_RECT, Size(10, 10)));
+
+	return filter;
+}
+
 
 Mat Normalization(Mat src){
 
@@ -198,19 +253,34 @@ void callBackFunc(int event, int x, int y, int flags, void* userdata){
 
 }
 
-Mat roadFilter2(int b, int g, int r, float magnitude, const Mat&src) {
-	int B, G, R;
-	assert(src.type() == CV_8UC3);
-	Mat filter;
-	//mask
-	inRange(src, Scalar(b-70, g-70, r-70), Scalar(190, 190,190), filter); //Threshold the image
+Mat LabBgrMask(Mat origin, Mat background){
 
-	erode(filter, filter, getStructuringElement(MORPH_RECT, Size(10, 10)));
-	erode(filter, filter, getStructuringElement(MORPH_RECT, Size(10, 10)));
-	dilate(filter, filter, getStructuringElement(MORPH_RECT, Size(10, 10)));
-	dilate(filter, filter, getStructuringElement(MORPH_RECT, Size(10, 10)));
-	erode(filter, filter, getStructuringElement(MORPH_RECT, Size(10, 10)));
-	dilate(filter, filter, getStructuringElement(MORPH_RECT, Size(10, 10)));
+	Mat back, canny, gray;
+	Mat box, box3, lab_back, filter, box4, Color_Mask;
 
-	return filter;
+	back = background.clone();
+
+	cvtColor(back, gray, CV_RGB2GRAY);
+	GaussianBlur(gray, gray, Size(7, 7), 0, 0);
+	Canny(gray, canny, 15, 25, 3);
+	imshow("CANNY", canny);
+	box = nonedge_area(canny, 0.3, 20);
+	imshow("BOX", box);
+	box3 = FindLargestArea(origin, box); // this is the mask
+
+	//Input Lab Matrix && Largest Area's Mask.
+
+	cvtColor(back, lab_back, CV_BGR2Lab);
+	Scalar value = mean(lab_back, box3); // box3 = Mask,
+	filter = roadFilter(lab_back, 1.2, box3);
+	filter = filter > 128;
+
+	//Input BGR Matrix && Largest Area's Mask.
+	box4 = roadFilter2(back, 2.5, box3);
+	box4 = box4 > 128;
+
+	//AND MASK FILTER&&BOX4
+	bitwise_and(filter, box4, Color_Mask);
+
+	return Color_Mask;
 }
