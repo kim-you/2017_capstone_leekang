@@ -219,7 +219,7 @@ Mat Normalization(Mat src){
 	return c_lab;
 }
 
-void callBackFunc(int event, int x, int y, int flags, void* userdata){
+void callBackFunc2(int event, int x, int y, int flags, void* userdata){
 	Mat src = *(Mat*)userdata;
 	Mat src2, src3, src4, src5;
 

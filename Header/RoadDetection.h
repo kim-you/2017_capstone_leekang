@@ -19,5 +19,5 @@ Mat FindLargestArea(Mat origin, Mat cannies);
 Mat nonedge_area(Mat src, float sky_rate, int window_size);
 Mat roadFilter(const Mat& src, double sigma, Mat mask);
 Mat roadFilter2(const Mat& src, double sigma, Mat mask);
-void callBackFunc(int event, int x, int y, int flags, void* userdata);
+void callBackFunc2(int event, int x, int y, int flags, void* userdata);
 Mat LabBgrMask(Mat origin, Mat background);//Input: Background Matrix, Output: Mask Road Image
