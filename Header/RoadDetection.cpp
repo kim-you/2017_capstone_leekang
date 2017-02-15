@@ -67,9 +67,9 @@ Mat FindLargestArea(Mat origin, Mat cannies){
 
 Mat nonedge_area(Mat src, float sky_rate, int window_size) {
 	/*
-	Mat src :  ¿øº» ¿µ»ó(¿¡ÁöÃ³¸®ÈÄ->2ÁøÈ­¿µ»óÀ¸·Î º¯È¯µÈ ¿µ»óÀÌ¾î¾ßÇÔ.
-	float sky_rate : ÇÏ´Ã¿¡ ÇØ´çÇÏ´Â ºñÀ² (ex/ 0.3 : »óÀ§ 30%¸¦ ¹«½ÃÇÑ´Ù)
-	int window_size : À©µµ¿ìÀÇ Å©±â : ³·À»¼ö·Ï Á¤¹ĞÇÏ°Ô °Ë»ö.
+	Mat src :  ì›ë³¸ ì˜ìƒ(ì—ì§€ì²˜ë¦¬í›„->2ì§„í™”ì˜ìƒìœ¼ë¡œ ë³€í™˜ëœ ì˜ìƒì´ì–´ì•¼í•¨.
+	float sky_rate : í•˜ëŠ˜ì— í•´ë‹¹í•˜ëŠ” ë¹„ìœ¨ (ex/ 0.3 : ìƒìœ„ 30%ë¥¼ ë¬´ì‹œí•œë‹¤)
+	int window_size : ìœˆë„ìš°ì˜ í¬ê¸° : ë‚®ì„ìˆ˜ë¡ ì •ë°€í•˜ê²Œ ê²€ìƒ‰.
 	*/
 
 	int i, i2 = 0;
@@ -287,4 +287,68 @@ Mat LabBgrMask(Mat origin, Mat background){
 	bitwise_and(filter, box4, Color_Mask);
 
 	return Color_Mask;
+}
+
+bool intersection(Point2f o1, Point2f p1, Point2f o2, Point2f p2, Point2f &r)
+{
+
+
+	Point2f x = o2 - o1;
+	Point2f d1 = p1 - o1;
+	Point2f d2 = p2 - o2;
+
+	float cross = d1.x*d2.y - d1.y*d2.x;
+	if (abs(cross) < /*EPS*/1e-8)
+		return false;
+
+	double t1 = (x.x * d2.y - x.y * d2.x) / cross;
+	r = o1 + d1 * t1;
+	return true;
+}
+
+double dist(Point2f A, Point2f B) {
+	double X_diff = 0, Y_diff = 0;
+	X_diff = (A.x - B.x) * (A.x - B.x);
+	Y_diff = (A.y - B.y) * (A.y - B.y);
+	return sqrt(X_diff + Y_diff);
+}
+
+int ifLRline(Point2f A, Point2f B, Point2f P) {
+	if (A.x != B.x) {
+		double gradiant = (B.y - A.y) / (B.x - A.x);
+		double D = gradiant*(P.x - A.x) + A.y;
+		if (P.y > D)
+			return 1;
+		else if (P.y < D)
+			return -1;
+		else
+			return 0;
+	}
+}
+
+void OpticalFlow_Count(int Pnum, vector<uchar> status, int & Car_num, Mat& frame, Point2f & pass, vector<Point2f> after, vector<Point2f> Center, Point2f A, Point2f B) {
+	//		calcOpticalFlowPyrLK(former_gray, latter_gray, Center, after, status, err, Size(25, 25), 3);
+	for (int i = 0; i < Pnum; i++) {
+		if (status[i] == 0) // if the center[i] doesn't exist at the former frame
+			continue;		// continue
+		else {
+			circle(frame, after[i], 3, Scalar(0, 0, 255), 3, 8);	// draw estimated point
+			Point2f P;
+			if (intersection(Center[i], after[i], A, B, P)) {	// C - a __P__ A - B
+				if ((((A.x <= P.x) && (P.x <= B.x)) || ((B.x <= P.x) && (P.x <= A.x))) && (((A.y <= P.y) && (P.y <= B.y)) || ((B.y <= P.y) && (P.y <= A.y)))) {
+					//o1,p1  -- o2, p2
+					if (ifLRline(A, B, after[i]) * ifLRline(A, B, Center[i]) < 0) {	//	if Center[i] is on line A-B
+						if (dist(P, pass) < 4) { //	avoid double counting
+							pass = Point(0, 0);	 // only once
+							continue;
+						}
+						pass = P;	//save the point which is on the line 
+						Car_num++;
+						line(frame, A, B, Scalar(0, 255, 255), 10, 10, 0);
+					}
+				}
+			}
+		}
+	}
+
 }
