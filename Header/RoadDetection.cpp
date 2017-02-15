@@ -1,15 +1,15 @@
 /*
-2017 ì´ê°•êµìˆ˜ë‹˜ ìº¡ìŠ¤í†¤ íŒ€
-CCTV ì˜ìƒì—ì„œ ë„ë¡œë¥¼ êµ¬í•˜ëŠ” í”„ë¡œê·¸ëž¨ì˜ êµ¬í˜„ ë¶€ë¶„
-FindLargestArea -> Contour ì¤‘ ê°€ìž¥ í° ë©´ì ì„ ì°¨ì§€í•˜ëŠ” Contourë¥¼ êµ¬í•˜ëŠ” í”„ë¡œê·¸ëž¨.
-nonedge_area -> ì—£ì§€ê°€ ì—†ëŠ” ë¶€ë¶„ì„ êµ¬í•´ n*n ì˜ maskë¡œ ì”Œìš°ëŠ” í”„ë¡œê·¸ëž¨
-roadFilter -> íŠ¹ì •í•œ Scalar ê°’ì„ ì£¼ë©´ float ê°’ì˜ ì˜¤ì°¨ë²”ìœ„ ë‚´ì— ìžˆëŠ” Scalar ê°’ìœ¼ë¡œ í•„í„°ë§
-Normalization -> ì˜ìƒì„ Lab ì˜ìƒìœ¼ë¡œ ë°”ê¾¸ê³  ë°ê¸° ê°’ì„ í‰í™œí™” í•´ì£¼ëŠ” í”„ë¡œê·¸ëž¨.
+2017 ÀÌ°­±³¼ö´Ô Ä¸½ºÅæ ÆÀ
+CCTV ¿µ»ó¿¡¼­ µµ·Î¸¦ ±¸ÇÏ´Â ÇÁ·Î±×·¥ÀÇ ±¸Çö ºÎºÐ
+FindLargestArea -> Contour Áß °¡Àå Å« ¸éÀûÀ» Â÷ÁöÇÏ´Â Contour¸¦ ±¸ÇÏ´Â ÇÁ·Î±×·¥.
+nonedge_area -> ¿§Áö°¡ ¾ø´Â ºÎºÐÀ» ±¸ÇØ n*n ÀÇ mask·Î ¾º¿ì´Â ÇÁ·Î±×·¥
+roadFilter -> Æ¯Á¤ÇÑ Scalar °ªÀ» ÁÖ¸é float °ªÀÇ ¿ÀÂ÷¹üÀ§ ³»¿¡ ÀÖ´Â Scalar °ªÀ¸·Î ÇÊÅÍ¸µ
+Normalization -> ¿µ»óÀ» Lab ¿µ»óÀ¸·Î ¹Ù²Ù°í ¹à±â °ªÀ» ÆòÈ°È­ ÇØÁÖ´Â ÇÁ·Î±×·¥.
 */
 
 
-#include "cv.hpp" //ì—¬ê¸°ì— í•„ìš”í•œ ê±° ë‹¤ ìžˆìŒ
-#include "opencv2/opencv.hpp" //ì´ë ‡ê²Œë§Œ í•˜ë©´ ë‹¤ ëœ¬ë‹¤ ë‹¤ ëœ¬ë‹¤
+#include "cv.hpp" //¿©±â¿¡ ÇÊ¿äÇÑ °Å ´Ù ÀÖÀ½
+#include "opencv2/opencv.hpp" //ÀÌ·¸°Ô¸¸ ÇÏ¸é ´Ù ¶á´Ù ´Ù ¶á´Ù
 
 using namespace cv;
 
@@ -73,9 +73,9 @@ Mat FindLargestArea(Mat origin, Mat cannies){
 
 Mat nonedge_area(Mat src, float sky_rate, int window_size) {
 	/*
-	Mat src :  ì›ë³¸ ì˜ìƒ(ì—ì§€ì²˜ë¦¬í›„->2ì§„í™”ì˜ìƒìœ¼ë¡œ ë³€í™˜ëœ ì˜ìƒì´ì–´ì•¼í•¨.
-	float sky_rate : í•˜ëŠ˜ì— í•´ë‹¹í•˜ëŠ” ë¹„ìœ¨ (ex/ 0.3 : ìƒìœ„ 30%ë¥¼ ë¬´ì‹œí•œë‹¤)
-	int window_size : ìœˆë„ìš°ì˜ í¬ê¸° : ë‚®ì„ìˆ˜ë¡ ì •ë°€í•˜ê²Œ ê²€ìƒ‰.
+	Mat src :  ¿øº» ¿µ»ó(¿¡ÁöÃ³¸®ÈÄ->2ÁøÈ­¿µ»óÀ¸·Î º¯È¯µÈ ¿µ»óÀÌ¾î¾ßÇÔ.
+	float sky_rate : ÇÏ´Ã¿¡ ÇØ´çÇÏ´Â ºñÀ² (ex/ 0.3 : »óÀ§ 30%¸¦ ¹«½ÃÇÑ´Ù)
+	int window_size : À©µµ¿ìÀÇ Å©±â : ³·À»¼ö·Ï Á¤¹ÐÇÏ°Ô °Ë»ö.
 	*/
 
 	int i, i2 = 0;
@@ -221,13 +221,13 @@ Mat Normalization(Mat src){
 
 void callBackFunc(int event, int x, int y, int flags, void* userdata){
 	Mat src = *(Mat*)userdata;
-	Mat src2, src3, src4;
+	Mat src2, src3, src4, src5;
 
 	cvtColor(src, src2, CV_BGR2Lab);
 	cvtColor(src, src3, CV_BGR2HSV);
 	//img_bgr = src;
 	cvtColor(src, src4, CV_BGR2YCrCb);
-	//cvtColor(src, img_hls, CV_BGR2HLS);
+	cvtColor(src, src5, CV_BGR2GRAY);
 
 	switch (event){
 	case EVENT_LBUTTONDOWN:
@@ -241,6 +241,8 @@ void callBackFunc(int event, int x, int y, int flags, void* userdata){
 			src3.at<Vec3b>(y, x)[0], src3.at<Vec3b>(y, x)[1], src3.at<Vec3b>(y, x)[2]);
 		printf("YCrCb Screen: Scalar[0] = %d, Scalar[1] = %d, Scalar[2] = %d\n",
 			src4.at<Vec3b>(y, x)[0], src4.at<Vec3b>(y, x)[1], src4.at<Vec3b>(y, x)[2]);
+		printf("GRAY Screen: Scalar[0] = %d, Scalar[1] = %d, Scalar[2] = %d\n",
+			src5.at<Vec3b>(y, x)[0], src5.at<Vec3b>(y, x)[1], src5.at<Vec3b>(y, x)[2]);
 		printf("-----------------------------------------------------------------\n");
 		rectangle(src, Point(x - 5, y - 5), Point(x + 5, y + 5), Scalar(0, 0, 255), 1, 8);
 		char str[200];
@@ -263,9 +265,9 @@ Mat LabBgrMask(Mat origin, Mat background){
 	cvtColor(back, gray, CV_RGB2GRAY);
 	GaussianBlur(gray, gray, Size(7, 7), 0, 0);
 	Canny(gray, canny, 15, 25, 3);
-	//imshow("CANNY", canny);
+	imshow("CANNY", canny);
 	box = nonedge_area(canny, 0.3, 20);
-	//imshow("BOX", box);
+	imshow("BOX", box);
 	box3 = FindLargestArea(origin, box); // this is the mask
 
 	//Input Lab Matrix && Largest Area's Mask.
