@@ -38,7 +38,7 @@ int main(void) {
 
 	A = Point(350, 280);
 	B = Point(1000, 280);  // initial line(A-B)
-	Point2f point1, point2, pass;
+	Point2f point1, pass;
 	bool click = false;
 
 	namedWindow("ORIGIN", 1);
