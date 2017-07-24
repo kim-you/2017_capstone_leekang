@@ -357,8 +357,9 @@ void OpticalFlow_Count(int Pnum, vector<uchar> status, int & Car_num, Mat& frame
 
 
 
-void detect_haarcascades(Mat src, String path="")
+void detect_haarcascades(Mat src, string path="")
 {
+	static boolean flag = 0;
 
 	Mat frame, frame2;
 	Mat fore, gray;
@@ -382,6 +383,8 @@ void detect_haarcascades(Mat src, String path="")
 	uchar *temp_ptr2;
 
 
+	
+
 	/* code block 1 */
 	//4000 Negative Test
 	//string cascadeName = "C:\\Users\\Administrator\\Desktop\\Study\\4학년\\공프기\\OpenCV\\MachineLearning\\cascade_Test\\cascade.xml";
@@ -391,13 +394,17 @@ void detect_haarcascades(Mat src, String path="")
 	//string cascadeName = "C:\\Users\\Administrator\\Desktop\\Study\\4학년\\공프기\\OpenCV\\MachineLearning\\cascade_Haar\\cascade.xml";
 	//SVM
 	//string cascadeName = "C:\\Users\\Administrator\\Desktop\\Study\\4학년\\공프기\\OpenCV\\MachineLearning\\trainedSVM.xml";
+	if (!(path.empty())) string cascadeName = path;
 
-	CascadeClassifier detector;
 
-	if (!detector.load(cascadeName))
-	{
-		printf("ERROR: Could not load classifier cascade\n");
-		return;
+	static CascadeClassifier detector;
+
+	if (flag == 0){
+		if (!detector.load(cascadeName))
+		{
+			printf("ERROR: Could not load classifier cascade\n");
+			return;
+		}
 	}
 
 	//casecade function parameters
@@ -463,5 +470,5 @@ void detect_haarcascades(Mat src, String path="")
 		//}
 	
 
-
+		flag = 1;
 }

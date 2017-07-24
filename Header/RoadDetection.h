@@ -26,4 +26,4 @@ int ifLRline(Point2f A, Point2f B, Point2f P);
 bool intersection(Point2f o1, Point2f p1, Point2f o2, Point2f p2, Point2f &r);
 double dist(Point2f A, Point2f B);
 void OpticalFlow_Count(int Pnum, vector<uchar> status, int & Car_num, Mat& frame, Point2f & pass, vector<Point2f> after, vector<Point2f> Center, Point2f A, Point2f B);
-void detect_haarcascades(Mat src, String path="");//Input source & Input Cascade XML's path.
+void detect_haarcascades(Mat src, string path="");//Input source & Input Cascade XML's path.
