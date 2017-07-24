@@ -1,16 +1,16 @@
 /*
-2017 ì´ê°•êµìˆ˜ë‹˜ ìº¡ìŠ¤í†¤ íŒ€
-CCTV ì˜ìƒì—ì„œ ë„ë¡œë¥¼ êµ¬í•˜ëŠ” í”„ë¡œê·¸ë¨ì˜ êµ¬í˜„ ë¶€ë¶„
-FindLargestArea -> Contour ì¤‘ ê°€ì¥ í° ë©´ì ì„ ì°¨ì§€í•˜ëŠ” Contourë¥¼ êµ¬í•˜ëŠ” í”„ë¡œê·¸ë¨.
-nonedge_area -> ì—£ì§€ê°€ ì—†ëŠ” ë¶€ë¶„ì„ êµ¬í•´ n*n ì˜ maskë¡œ ì”Œìš°ëŠ” í”„ë¡œê·¸ë¨
-roadFilter -> íŠ¹ì •í•œ Scalar ê°’ì„ ì£¼ë©´ float ê°’ì˜ ì˜¤ì°¨ë²”ìœ„ ë‚´ì— ìˆëŠ” Scalar ê°’ìœ¼ë¡œ í•„í„°ë§
-Normalization -> ì˜ìƒì„ Lab ì˜ìƒìœ¼ë¡œ ë°”ê¾¸ê³  ë°ê¸° ê°’ì„ í‰í™œí™” í•´ì£¼ëŠ” í”„ë¡œê·¸ë¨.
-callBackFunc -> ë§ˆìš°ìŠ¤ ì´ë²¤íŠ¸ì—ì„œ ì™¼ìª½ í´ë¦­ ì‹œ, í•´ë‹¹í•˜ëŠ” Color Space í‘œì‹œ.
-LabBgrMask -> ë°°ê²½í™”ë©´ì˜ Labì™€ Bgr ê°’ì˜ í‘œì¤€í¸ì°¨ë¡œ Maskë¥¼ ì”Œìš°ëŠ” í•¨ìˆ˜.
+2017 ÀÌ°­±³¼ö´Ô Ä¸½ºÅæ ÆÀ
+CCTV ¿µ»ó¿¡¼­ µµ·Î¸¦ ±¸ÇÏ´Â ÇÁ·Î±×·¥ÀÇ ±¸Çö ºÎºĞ
+FindLargestArea -> Contour Áß °¡Àå Å« ¸éÀûÀ» Â÷ÁöÇÏ´Â Contour¸¦ ±¸ÇÏ´Â ÇÁ·Î±×·¥.
+nonedge_area -> ¿§Áö°¡ ¾ø´Â ºÎºĞÀ» ±¸ÇØ n*n ÀÇ mask·Î ¾º¿ì´Â ÇÁ·Î±×·¥
+roadFilter -> Æ¯Á¤ÇÑ Scalar °ªÀ» ÁÖ¸é float °ªÀÇ ¿ÀÂ÷¹üÀ§ ³»¿¡ ÀÖ´Â Scalar °ªÀ¸·Î ÇÊÅÍ¸µ
+Normalization -> ¿µ»óÀ» Lab ¿µ»óÀ¸·Î ¹Ù²Ù°í ¹à±â °ªÀ» ÆòÈ°È­ ÇØÁÖ´Â ÇÁ·Î±×·¥.
+callBackFunc -> ¸¶¿ì½º ÀÌº¥Æ®¿¡¼­ ¿ŞÂÊ Å¬¸¯ ½Ã, ÇØ´çÇÏ´Â Color Space Ç¥½Ã.
+LabBgrMask -> ¹è°æÈ­¸éÀÇ Lab¿Í Bgr °ªÀÇ Ç¥ÁØÆíÂ÷·Î Mask¸¦ ¾º¿ì´Â ÇÔ¼ö.
 */
 
-#include "cv.hpp" //ì—¬ê¸°ì— í•„ìš”í•œ ê±° ë‹¤ ìˆìŒ
-#include "opencv2/opencv.hpp" //ì´ë ‡ê²Œë§Œ í•˜ë©´ ë‹¤ ëœ¬ë‹¤ ë‹¤ ëœ¬ë‹¤
+#include "cv.hpp" //¿©±â¿¡ ÇÊ¿äÇÑ °Å ´Ù ÀÖÀ½
+#include "opencv2/opencv.hpp" //ÀÌ·¸°Ô¸¸ ÇÏ¸é ´Ù ¶á´Ù ´Ù ¶á´Ù
 
 using namespace cv;
 Point2f A, B;
@@ -26,3 +26,4 @@ int ifLRline(Point2f A, Point2f B, Point2f P);
 bool intersection(Point2f o1, Point2f p1, Point2f o2, Point2f p2, Point2f &r);
 double dist(Point2f A, Point2f B);
 void OpticalFlow_Count(int Pnum, vector<uchar> status, int & Car_num, Mat& frame, Point2f & pass, vector<Point2f> after, vector<Point2f> Center, Point2f A, Point2f B);
+void detect_haarcascades(Mat src, String path="");//Input source & Input Cascade XML's path.

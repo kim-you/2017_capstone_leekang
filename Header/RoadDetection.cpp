@@ -4,6 +4,11 @@ Winter Vacation Proeject
 
 #include "cv.hpp"
 #include "opencv2/opencv.hpp"
+#include <sstream>
+#include <windows.h>
+#include <Tchar.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 using namespace cv;
 
@@ -17,9 +22,9 @@ Mat FindLargestArea(Mat origin, Mat cannies){
 	int nBlue = 0, nGreen = 0, nRed = 0;
 
 	double maxcontour = 0;
-/*
+	/*
 	for (i = 0; i < 3; i++)
-		bgr[i] = 0;*/
+	bgr[i] = 0;*/
 
 	vector<vector<Point>> contours;
 	vector<Vec4i>hierarchy;
@@ -44,32 +49,29 @@ Mat FindLargestArea(Mat origin, Mat cannies){
 	drawContours(source, contours, count, Scalar(255), CV_FILLED, 8, hierarchy);
 	/*
 	for (x = 0; x<origin.rows; x++){
-		for (y = 0; y<origin.cols; y++){
-			if (origin.at<cv::Vec3b>(y, x)[0] == 0 && origin.at<cv::Vec3b>(y, x)[1] == 0 && origin.at<cv::Vec3b>(y, x)[2] == 255){
-				nBlue = src.at<cv::Vec3b>(y, x - 1)[0];
-				nGreen = src.at<cv::Vec3b>(y, x - 1)[1];
-				nRed = src.at<cv::Vec3b>(y, x - 1)[2];
-			}
-		}
+	for (y = 0; y<origin.cols; y++){
+	if (origin.at<cv::Vec3b>(y, x)[0] == 0 && origin.at<cv::Vec3b>(y, x)[1] == 0 && origin.at<cv::Vec3b>(y, x)[2] == 255){
+	nBlue = src.at<cv::Vec3b>(y, x - 1)[0];
+	nGreen = src.at<cv::Vec3b>(y, x - 1)[1];
+	nRed = src.at<cv::Vec3b>(y, x - 1)[2];
 	}
-
+	}
+	}
 	bgr[0] = nBlue;
 	bgr[1] = nGreen;
 	bgr[2] = nRed;
-
 	//
 	printf("In Function: Blue = %d, Green = %d, Red = %d\n", bgr[0], bgr[1], bgr[2]);
-
 	*/
-	
+
 	return source;
 }
 
 Mat nonedge_area(Mat src, float sky_rate, int window_size) {
 	/*
-	Mat src :  ì›ë³¸ ì˜ìƒ(ì—ì§€ì²˜ë¦¬í›„->2ì§„í™”ì˜ìƒìœ¼ë¡œ ë³€í™˜ëœ ì˜ìƒì´ì–´ì•¼í•¨.
-	float sky_rate : í•˜ëŠ˜ì— í•´ë‹¹í•˜ëŠ” ë¹„ìœ¨ (ex/ 0.3 : ìƒìœ„ 30%ë¥¼ ë¬´ì‹œí•œë‹¤)
-	int window_size : ìœˆë„ìš°ì˜ í¬ê¸° : ë‚®ì„ìˆ˜ë¡ ì •ë°€í•˜ê²Œ ê²€ìƒ‰.
+	Mat src :  ¿øº» ¿µ»ó(¿¡ÁöÃ³¸®ÈÄ->2ÁøÈ­¿µ»óÀ¸·Î º¯È¯µÈ ¿µ»óÀÌ¾î¾ßÇÔ.
+	float sky_rate : ÇÏ´Ã¿¡ ÇØ´çÇÏ´Â ºñÀ² (ex/ 0.3 : »óÀ§ 30%¸¦ ¹«½ÃÇÑ´Ù)
+	int window_size : À©µµ¿ìÀÇ Å©±â : ³·À»¼ö·Ï Á¤¹ÐÇÏ°Ô °Ë»ö.
 	*/
 
 	int i, i2 = 0;
@@ -109,12 +111,12 @@ Mat roadFilter(const Mat& src, double sigma, Mat mask) {
 	/* In Lab Color space, Filtering only L's value with sigma*/
 
 	assert(src.type() == CV_8UC3);
-	
+
 	Mat filter;
-	
+
 	Scalar mean;
 	Scalar dev;
-	
+
 	double mean_v[3];
 	double dev_v[3];
 	double sigma_v[3];
@@ -122,7 +124,7 @@ Mat roadFilter(const Mat& src, double sigma, Mat mask) {
 	meanStdDev(src, mean, dev, mask);
 
 	for (int i = 0; i < 3; i++)
-	sigma_v[i] = (sigma*dev.val[i]);
+		sigma_v[i] = (sigma*dev.val[i]);
 
 	for (int i = 0; i < 3; i++){
 		mean_v[i] = mean.val[i];
@@ -132,27 +134,27 @@ Mat roadFilter(const Mat& src, double sigma, Mat mask) {
 	printf("LAB MEAN %lf %lf %lf\n", mean_v[0], mean_v[1], mean_v[2]);
 	printf("LAB DEV %lf %lf %lf\n", dev_v[0], dev_v[1], dev_v[2]);
 	printf("SIGMA %lf %lf %lf\n", sigma_v[0], sigma_v[1], sigma_v[2]);
-	
+
 	if ((sigma_v[1] + sigma_v[2]) <= 20){
 		sigma_v[1] = 7;
 		sigma_v[2] = 10;
 	}
-	
+
 	printf("SIGMA_FIX %lf %lf %lf\n", sigma_v[0], sigma_v[1], sigma_v[2]);
-	inRange(src, Scalar(mean_v[0]-70, mean_v[1]-sigma_v[1], mean_v[2]-sigma_v[2]), Scalar(255, mean_v[1]+sigma_v[1], mean_v[2]+sigma_v[2]), filter); //Threshold the image
+	inRange(src, Scalar(mean_v[0] - 70, mean_v[1] - sigma_v[1], mean_v[2] - sigma_v[2]), Scalar(255, mean_v[1] + sigma_v[1], mean_v[2] + sigma_v[2]), filter); //Threshold the image
 
 	erode(filter, filter, getStructuringElement(MORPH_RECT, Size(10, 10)));
 	erode(filter, filter, getStructuringElement(MORPH_RECT, Size(10, 10)));
 	dilate(filter, filter, getStructuringElement(MORPH_RECT, Size(10, 10)));
 	dilate(filter, filter, getStructuringElement(MORPH_RECT, Size(10, 10)));
 	erode(filter, filter, getStructuringElement(MORPH_RECT, Size(10, 10)));
-	dilate(filter, filter, getStructuringElement(MORPH_RECT, Size(10, 10)));	
-	
+	dilate(filter, filter, getStructuringElement(MORPH_RECT, Size(10, 10)));
+
 	return filter;
 }
 
 Mat roadFilter2(const Mat& src, double sigma, Mat mask) {
-	
+
 	/*BGR Color Space Filter with Sigma*/
 
 	assert(src.type() == CV_8UC3);
@@ -166,9 +168,9 @@ Mat roadFilter2(const Mat& src, double sigma, Mat mask) {
 	double sigma_v[3];
 
 	meanStdDev(src, mean, dev, mask);
-	
-	for (int i = 0; i < 3;i++)
-	sigma_v[i] = (sigma*dev.val[i]);
+
+	for (int i = 0; i < 3; i++)
+		sigma_v[i] = (sigma*dev.val[i]);
 
 	for (int i = 0; i < 3; i++){
 		mean_v[i] = mean.val[i];
@@ -203,7 +205,7 @@ Mat Normalization(Mat src){
 	split(c_lab, lab_images);
 
 	equalizeHist(lab_images[0], lab_images[0]);
-	
+
 	//printf("Light = %d\n", int(value.val[0]));
 	merge(lab_images, c_lab);
 	cvtColor(c_lab, c_lab, CV_Lab2BGR);
@@ -214,19 +216,19 @@ Mat Normalization(Mat src){
 }
 
 void callBackFunc2(int event, int x, int y, int flags, void* userdata){
-	
+
 	/* When Mouse Click, Get Scalar Values on Clicked Point */
 
 	Mat src = *(Mat*)userdata;
-	Mat src2, src3, src4, src5;
+	Mat src2, src3, src4, src5, src6;
 
 	cvtColor(src, src2, CV_BGR2Lab);
 	cvtColor(src, src3, CV_BGR2HSV);
 	cvtColor(src, src4, CV_BGR2YCrCb);
-	cvtColor(src, src5, CV_BGR2GRAY);
+	cvtColor(src, src5, CV_BGR2XYZ);
 
 	switch (event){
-	
+
 	case EVENT_LBUTTONDOWN:
 
 		printf("%d : X = %d, Y = %d\n", counts_number, x, y);
@@ -238,20 +240,20 @@ void callBackFunc2(int event, int x, int y, int flags, void* userdata){
 			src3.at<Vec3b>(y, x)[0], src3.at<Vec3b>(y, x)[1], src3.at<Vec3b>(y, x)[2]);
 		printf("YCrCb Screen: Scalar[0] = %d, Scalar[1] = %d, Scalar[2] = %d\n",
 			src4.at<Vec3b>(y, x)[0], src4.at<Vec3b>(y, x)[1], src4.at<Vec3b>(y, x)[2]);
-		printf("GRAY Screen: Scalar[0] = %d, Scalar[1] = %d, Scalar[2] = %d\n",
+		printf("XYZ Screen: Scalar[0] = %d, Scalar[1] = %d, Scalar[2] = %d\n",
 			src5.at<Vec3b>(y, x)[0], src5.at<Vec3b>(y, x)[1], src5.at<Vec3b>(y, x)[2]);
 		printf("-----------------------------------------------------------------\n");
-	
+
 		rectangle(src, Point(x - 5, y - 5), Point(x + 5, y + 5), Scalar(0, 0, 255), 1, 8);
-		
+
 		char str[200];
 		sprintf(str, "%d", counts_number);
-		putText(src, str, Point(x - 7, y -10), 1, 1, Scalar(0, 0, 255));
-		
+		putText(src, str, Point(x - 7, y - 10), 1, 1, Scalar(0, 0, 255));
+
 		imshow("ORIGIN", src);
-		
+
 		counts_number++;
-		
+
 		break;
 	}
 
@@ -350,5 +352,116 @@ void OpticalFlow_Count(int Pnum, vector<uchar> status, int & Car_num, Mat& frame
 			}
 		}
 	}
+
+}
+
+
+
+void detect_haarcascades(Mat src, String path="")
+{
+
+	Mat frame, frame2;
+	Mat fore, gray;
+
+	frame = src.clone();
+
+	if (frame.empty()) return;
+
+
+	int w = frame.size().width;
+	int h = frame.size().height;
+
+
+	//frame size
+	
+
+	__int64 freq, start, finish;
+	::QueryPerformanceFrequency((_LARGE_INTEGER*)&freq);
+
+	uchar *temp_ptr;
+	uchar *temp_ptr2;
+
+
+	/* code block 1 */
+	//4000 Negative Test
+	//string cascadeName = "C:\\Users\\Administrator\\Desktop\\Study\\4ÇÐ³â\\°øÇÁ±â\\OpenCV\\MachineLearning\\cascade_Test\\cascade.xml";
+	//LBP
+	string cascadeName = "C:\\Users\\Administrator\\Desktop\\Study\\4ÇÐ³â\\°øÇÁ±â\\OpenCV\\MachineLearning\\cascade\\cascade.xml";
+	//HOG
+	//string cascadeName = "C:\\Users\\Administrator\\Desktop\\Study\\4ÇÐ³â\\°øÇÁ±â\\OpenCV\\MachineLearning\\cascade_Haar\\cascade.xml";
+	//SVM
+	//string cascadeName = "C:\\Users\\Administrator\\Desktop\\Study\\4ÇÐ³â\\°øÇÁ±â\\OpenCV\\MachineLearning\\trainedSVM.xml";
+
+	CascadeClassifier detector;
+
+	if (!detector.load(cascadeName))
+	{
+		printf("ERROR: Could not load classifier cascade\n");
+		return;
+	}
+
+	//casecade function parameters
+	int gr_thr = 3;
+	double scale_step = 1.1;
+
+
+	//object size
+	Size min_obj_sz_step(25, 25);
+	Size max_obj_sz_step(180, 180);
+
+
+	
+		frame = src.clone();
+		// input image
+		if (frame.empty()) return;
+
+		//processing time set
+		::QueryPerformanceCounter((_LARGE_INTEGER*)&start);
+
+		Mat ROI;
+		Rect ROI_rect(w*0.1, h*0.1, w*0.8, h*0.8);
+		ROI = frame(ROI_rect);
+
+
+
+		/* code block 2 */
+		vector<Rect> found;
+		detector.detectMultiScale(ROI, found, scale_step, gr_thr, 0, min_obj_sz_step, max_obj_sz_step);
+
+
+		//add offset
+		for (int i = 0; i < (int)found.size(); i++) {
+			found[i].x += w*0.1;
+			found[i].y += h*0.1;
+		}
+		//draw rectangles
+		for (int i = 0; i < (int)found.size(); i++)
+		{
+			rectangle(frame, found[i], Scalar(0, 255, 255), 3);
+		}
+
+		// processing time check (fps)
+		::QueryPerformanceCounter((_LARGE_INTEGER*)&finish);
+		double fps = freq / double(finish - start + 1);
+		char fps_str[20];
+		sprintf_s(fps_str, 20, "FPS: %.1lf", fps);
+		putText(frame, fps_str, Point(5, 35), FONT_HERSHEY_SIMPLEX, 1., Scalar(0, 0, 0), 2);
+
+
+		//show image
+		imshow("raw image", frame);
+		//imshow("ROI image", ROI);
+
+		//hit 'space' -> step
+		//hit 'ESC' -> escape
+		//char ch = waitKey(10);
+		//if (ch == 27) break;            // ESC Key
+		//else if (ch == 32)               // SPACE Key
+		//{
+		//	while ((ch = waitKey(10)) != 32 && ch != 27);
+		//	if (ch == 27) break;
+		//}
+	
+
 
 }
