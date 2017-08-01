@@ -9,8 +9,10 @@ Winter Vacation Proeject
 #include <Tchar.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <iostream>
 
 using namespace cv;
+using namespace std;
 
 int counts_number = 1;
 
@@ -381,29 +383,37 @@ void detect_haarcascades(Mat src, string path="")
 
 	uchar *temp_ptr;
 	uchar *temp_ptr2;
-
-
 	
 
 	/* code block 1 */
 	//4000 Negative Test
 	//string cascadeName = "C:\\Users\\Administrator\\Desktop\\Study\\4학년\\공프기\\OpenCV\\MachineLearning\\cascade_Test\\cascade.xml";
 	//LBP
-	string cascadeName = "C:\\Users\\Administrator\\Desktop\\Study\\4학년\\공프기\\OpenCV\\MachineLearning\\cascade\\cascade.xml";
+	string cascadeName = "C:\\Users\\Administrator\\Desktop\\Study\\4학년\\공프기\\OpenCV\\MachineLearning\\cascade2\\cascade.xml";
 	//HOG
 	//string cascadeName = "C:\\Users\\Administrator\\Desktop\\Study\\4학년\\공프기\\OpenCV\\MachineLearning\\cascade_Haar\\cascade.xml";
 	//SVM
 	//string cascadeName = "C:\\Users\\Administrator\\Desktop\\Study\\4학년\\공프기\\OpenCV\\MachineLearning\\trainedSVM.xml";
-	if (!(path.empty())) string cascadeName = path;
+
 
 
 	static CascadeClassifier detector;
 
 	if (flag == 0){
+
+		if (path.empty()) printf("Path Empty\n");
+
+		if (!(path.empty())){
+			printf("Not Empty\n");
+			string cascadeName = path;
+		}
+
+		printf("The path is %s\n", cascadeName.c_str());
+
 		if (!detector.load(cascadeName))
 		{
 			printf("ERROR: Could not load classifier cascade\n");
-			return;
+			exit(0);
 		}
 	}
 
@@ -427,8 +437,8 @@ void detect_haarcascades(Mat src, string path="")
 
 		Mat ROI;
 		Rect ROI_rect(w*0.1, h*0.1, w*0.8, h*0.8);
-		ROI = frame(ROI_rect);
-
+		//ROI = frame(ROI_rect);
+		ROI = frame.clone();
 
 
 		/* code block 2 */
@@ -436,15 +446,16 @@ void detect_haarcascades(Mat src, string path="")
 		detector.detectMultiScale(ROI, found, scale_step, gr_thr, 0, min_obj_sz_step, max_obj_sz_step);
 
 
-		//add offset
-		for (int i = 0; i < (int)found.size(); i++) {
-			found[i].x += w*0.1;
-			found[i].y += h*0.1;
-		}
+		////add offset
+		//for (int i = 0; i < (int)found.size(); i++) {
+		//	found[i].x += w*0.1;
+		//	found[i].y += h*0.1;
+		//}
+
 		//draw rectangles
 		for (int i = 0; i < (int)found.size(); i++)
 		{
-			rectangle(frame, found[i], Scalar(0, 255, 255), 3);
+			rectangle(frame, found[i], Scalar(0, 255, 0), 3);
 		}
 
 		// processing time check (fps)
@@ -452,7 +463,7 @@ void detect_haarcascades(Mat src, string path="")
 		double fps = freq / double(finish - start + 1);
 		char fps_str[20];
 		sprintf_s(fps_str, 20, "FPS: %.1lf", fps);
-		putText(frame, fps_str, Point(5, 35), FONT_HERSHEY_SIMPLEX, 1., Scalar(0, 0, 0), 2);
+		putText(frame, fps_str, Point(5, 35), FONT_HERSHEY_SIMPLEX, 1., Scalar(0, 0, 255), 2);
 
 
 		//show image
@@ -471,4 +482,238 @@ void detect_haarcascades(Mat src, string path="")
 	
 
 		flag = 1;
+}
+
+Mat DistHisto(Mat Origin, Mat compare1, Mat compare2, Mat compare3, int SEG_SIZE){
+
+
+	Mat src_base, src_base1, hsv_base, hsv_base1;
+	Mat src_test1, hsv_test1;
+	Mat src_test2, hsv_test2;
+	Mat src_line;
+	int match0 = 0;
+	int match1 = 0;
+	int match2 = 0;
+
+
+	src_base = Origin.clone();
+	src_base1 = compare1.clone();
+	src_test1 = compare2.clone();
+	src_test2 = compare3.clone();
+
+	cvtColor(src_base, hsv_base, CV_BGR2HSV);
+	cvtColor(src_base1, hsv_base1, CV_BGR2HSV);
+	cvtColor(src_test1, hsv_test1, CV_BGR2HSV);
+	cvtColor(src_test2, hsv_test2, CV_BGR2HSV);
+
+	src_base.copyTo(src_line);
+
+	//Allocate Array Size
+	int Mat_row = Origin.rows / SEG_SIZE + 1;
+	int Mat_col = Origin.cols / SEG_SIZE + 1;
+
+	if (Origin.rows / SEG_SIZE == 0){
+		int Mat_row = Origin.rows / SEG_SIZE;
+	}
+
+	if (Origin.cols / SEG_SIZE == 0){
+		int Mat_col = Origin.cols / SEG_SIZE;
+	}
+
+
+	//Dynamic Allocation.
+	Mat **temporary = new Mat*[Mat_col];
+	for (int z = 0; z < Mat_col; z++)
+		temporary[z] = new Mat[Mat_row];
+
+	Mat **temporary2 = new Mat*[Mat_col];
+	for (int z = 0; z < Mat_col; z++)
+		temporary2[z] = new Mat[Mat_row];
+
+	Mat **temporary3 = new Mat*[Mat_col];
+	for (int z = 0; z < Mat_col; z++)
+		temporary3[z] = new Mat[Mat_row];
+
+	Mat **temporary4 = new Mat*[Mat_col];
+	for (int z = 0; z < Mat_col; z++)
+		temporary4[z] = new Mat[Mat_row];
+
+	printf("Matrix [%d x %d] Allocated \n", Mat_col, Mat_row);
+
+	//Dynamic Allocate Mat[][]
+	for (int i = 0; i < src_base.cols; i = i + SEG_SIZE){
+
+
+		for (int j = 0; j < src_base.rows; j = j + SEG_SIZE){
+
+			printf("%d and %d\n", i, j);
+
+			if ((src_base.rows - j) < SEG_SIZE && (src_base.cols - i) < SEG_SIZE){
+				temporary[i / SEG_SIZE][j / SEG_SIZE] = hsv_base(Range(j, j + (src_base.rows%SEG_SIZE)), Range(i, i + (src_base.cols%SEG_SIZE - 1)));
+				temporary2[i / SEG_SIZE][j / SEG_SIZE] = hsv_test1(Range(j, j + (src_base.rows%SEG_SIZE)), Range(i, i + (src_base.cols%SEG_SIZE - 1)));
+				temporary3[i / SEG_SIZE][j / SEG_SIZE] = hsv_test2(Range(j, j + (src_base.rows%SEG_SIZE)), Range(i, i + (src_base.cols%SEG_SIZE - 1)));
+				temporary4[i / SEG_SIZE][j / SEG_SIZE] = hsv_base1(Range(j, j + (src_base.rows%SEG_SIZE)), Range(i, i + (src_base.cols%SEG_SIZE - 1)));
+
+			}
+			else if ((src_base.rows - j) < SEG_SIZE){
+				temporary[i / SEG_SIZE][j / SEG_SIZE] = hsv_base(Range(j, j + (src_base.rows%SEG_SIZE)), Range(i, i + SEG_SIZE));
+				temporary2[i / SEG_SIZE][j / SEG_SIZE] = hsv_test1(Range(j, j + (src_base.rows%SEG_SIZE)), Range(i, i + SEG_SIZE));
+				temporary3[i / SEG_SIZE][j / SEG_SIZE] = hsv_test2(Range(j, j + (src_base.rows%SEG_SIZE)), Range(i, i + SEG_SIZE));
+				temporary4[i / SEG_SIZE][j / SEG_SIZE] = hsv_base1(Range(j, j + (src_base.rows%SEG_SIZE)), Range(i, i + SEG_SIZE));
+			}
+
+			else if ((src_base.cols - i) < SEG_SIZE){
+				temporary[i / SEG_SIZE][j / SEG_SIZE] = hsv_base(Range(j, j + SEG_SIZE), Range(i, i + (src_base.cols%SEG_SIZE - 1)));
+				temporary2[i / SEG_SIZE][j / SEG_SIZE] = hsv_test1(Range(j, j + SEG_SIZE), Range(i, i + (src_base.cols%SEG_SIZE - 1)));
+				temporary3[i / SEG_SIZE][j / SEG_SIZE] = hsv_test2(Range(j, j + SEG_SIZE), Range(i, i + (src_base.cols%SEG_SIZE - 1)));
+				temporary4[i / SEG_SIZE][j / SEG_SIZE] = hsv_base1(Range(j, j + SEG_SIZE), Range(i, i + (src_base.cols%SEG_SIZE - 1)));
+			}
+			else{
+				temporary[i / SEG_SIZE][j / SEG_SIZE] = hsv_base(Range(j, j + SEG_SIZE), Range(i, i + SEG_SIZE));
+				temporary2[i / SEG_SIZE][j / SEG_SIZE] = hsv_test1(Range(j, j + SEG_SIZE), Range(i, i + SEG_SIZE));
+				temporary3[i / SEG_SIZE][j / SEG_SIZE] = hsv_test2(Range(j, j + SEG_SIZE), Range(i, i + SEG_SIZE));
+				temporary4[i / SEG_SIZE][j / SEG_SIZE] = hsv_base1(Range(j, j + SEG_SIZE), Range(i, i + SEG_SIZE));
+			}
+
+		}
+
+	}
+
+
+
+	///// Using 50 bins for hue and 60 for saturation
+	int h_bins = 80;
+	int s_bins = 80;
+	int v_bins = 80;
+
+	int histSize[] = { h_bins, s_bins, v_bins };
+	//int histSize[] = { h_bins, s_bins};
+	//int histSize[] = { h_bins};
+
+	//// hue varies from 0 to 179, saturation from 0 to 255
+	float h_ranges[] = { 0, 256 };
+	float s_ranges[] = { 0, 256 };
+	float v_ranges[] = { 0, 256 };
+
+	const float* ranges[] = { h_ranges, s_ranges, v_ranges };
+	//const float* ranges[] = { h_ranges, s_ranges};
+	//const float* ranges[] = { h_ranges};
+
+	// Use the o-th and 1-st channels
+	int channels[] = { 0, 1, 2 };
+	//int channels[] = { 0, 1};
+
+
+	/// Histograms
+	MatND hist_base;
+	MatND hist_base1;
+	MatND hist_test1;
+	MatND hist_test2;
+
+
+	//Draw Line Image for comparision.
+	for (int i = 0; i < src_base.cols; i = i + SEG_SIZE){
+		line(src_line, Point(i, 0), Point(i, src_base.rows), Scalar(0, 255, 255), 1, 4);
+		//line(test_mask, Point(i, 0), Point(i, src_base.rows), Scalar(0, 255, 255), 1, 4);
+	}
+
+	for (int j = 0; j < src_base.rows; j = j + SEG_SIZE){
+		line(src_line, Point(0, j), Point(src_base.cols, j), Scalar(0, 255, 255), 1, 4);
+		//line(test_mask, Point(0, j), Point(src_base.cols, j), Scalar(0, 255, 255), 1, 4);
+	}
+
+	for (int i = 0; i < Mat_col; i++){
+
+		for (int j = 0; j < Mat_row; j++){
+			char str[200];
+			printf("Loop %d %d\n", i, j);
+			hsv_base = temporary[i][j].clone();
+			hsv_base1 = temporary4[i][j].clone();
+			hsv_test1 = temporary2[i][j].clone();
+			hsv_test2 = temporary3[i][j].clone();
+
+
+			/// Calculate the histograms for the HSV images
+			calcHist(&hsv_base, 1, channels, Mat(), hist_base, 2, histSize, ranges);
+			normalize(hist_base, hist_base, 0, 1, NORM_MINMAX, -1, Mat());
+
+			calcHist(&hsv_base1, 1, channels, Mat(), hist_base1, 2, histSize, ranges);
+			normalize(hist_base1, hist_base1, 0, 1, NORM_MINMAX, -1, Mat());
+
+			calcHist(&hsv_test1, 1, channels, Mat(), hist_test1, 2, histSize, ranges);
+			normalize(hist_test1, hist_test1, 0, 1, NORM_MINMAX, -1, Mat());
+
+			calcHist(&hsv_test2, 1, channels, Mat(), hist_test2, 2, histSize, ranges);
+			normalize(hist_test2, hist_test2, 0, 1, NORM_MINMAX, -1, Mat());
+
+			/// Apply the histogram comparison methods
+			double max_base = 0;
+			double base_test0 = compareHist(hist_base, hist_base1, 0);
+			double base_test1 = compareHist(hist_base, hist_test1, 0);
+			double base_test2 = compareHist(hist_base, hist_test2, 0);
+
+			if (base_test0 > 0.5 || base_test1 > 0.5 || base_test2 > 0.5){
+
+				if (base_test0 > 0.5)
+					match0++;
+				if (base_test1 > 0.5)
+					match1++;
+				if (base_test2 > 0.5)
+					match2++;
+
+				printf("Check!\n");
+				printf("Base-Test(0) Base-Test(1), Base-Test(2) : %f, %f, %f \n", base_test0, base_test1, base_test2);
+				//imshow("T1", temporary[i][j]);
+				//imshow("T2", temporary2[i][j]);
+				//imshow("T3", temporary3[i][j]);
+				//waitKey(0);
+
+				//				system("PAUSE");
+			}
+
+			max_base = MAX(base_test0, MAX(base_test1, base_test2));
+			cout << "MAXIMUM : " << max_base << endl;
+
+			if (max_base == base_test0){
+				putText(src_line, "1", Point(i*SEG_SIZE + SEG_SIZE / 2, j*SEG_SIZE + SEG_SIZE / 2), 1, 1, Scalar(0, 255, 0), 2, 4, false);
+				//putText(test_mask, "1", Point(i*SEG_SIZE + SEG_SIZE / 2, j*SEG_SIZE + SEG_SIZE / 2), 1, 1, Scalar(0, 255, 0), 2, 4, false);
+			}
+			if (max_base == base_test1){
+				putText(src_line, "2", Point(i*SEG_SIZE + SEG_SIZE / 2, j*SEG_SIZE + SEG_SIZE / 2), 1, 1, Scalar(255, 0, 0), 2, 4, false);
+				//	putText(test_mask, "2", Point(i*SEG_SIZE + SEG_SIZE / 2, j*SEG_SIZE + SEG_SIZE / 2), 1, 1, Scalar(255, 0, 0), 2, 4, false);
+			}
+			if (max_base == base_test2){
+				putText(src_line, "3", Point(i*SEG_SIZE + SEG_SIZE / 2, j*SEG_SIZE + SEG_SIZE / 2), 1, 1, Scalar(0, 0, 255), 2, 4, false);
+				//	putText(test_mask, "3", Point(i*SEG_SIZE + SEG_SIZE / 2, j*SEG_SIZE + SEG_SIZE / 2), 1, 1, Scalar(0, 0, 255), 2, 4, false);
+			}
+
+
+			printf("Base-Test(0) Base-Test(1), Base-Test(2) : %f, %f, %f \n", base_test0, base_test1, base_test2);
+			cout << "==================================================\n" << endl;
+		}
+
+	}
+	printf("=============The Match portion==================\n Test0 = %d / TEST1 = %d / Test2 = %d\n", match0, match1, match2);
+
+	imshow("Line", src_line);
+
+	for (int z = 0; z < Mat_col; ++z){
+		delete[] temporary[z];
+		delete[] temporary2[z];
+		delete[] temporary3[z];
+		delete[] temporary4[z];
+	}
+
+	int max_match = MAX(match0, MAX(match1, match2));
+
+	if (max_match == match0)
+		return compare1;
+
+	if (max_match == match1)
+		return compare2;
+
+	if (max_match == match2)
+		return compare3;
+
+
 }
