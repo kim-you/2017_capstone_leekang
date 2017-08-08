@@ -1,5 +1,6 @@
 #include "cv.hpp" //Header
 #include "opencv2/opencv.hpp" //Header include all
+#include "RoadDetection.h"
 
 using namespace std;
 using namespace cv;
@@ -14,20 +15,28 @@ int number = 0;
 
 int main(){
 	int i = 0;
+
+	int* min = new int(3);
+	min[0] = 1000000;
+	min[1] = 1000000;
+	min[2] = 1000000;
+
 	int flag = -1;
 	int average_edge = 0;
 	int key, frame_rate = FRAMERATE;
 
 	VideoCapture capture("C:\\Users\\Administrator\\Desktop\\Study\\4학년\\공프기\\OpenCV\\TrafficExample\\traffic16.avi");
+	//VideoCapture capture(0);
 	
 	Mat src, gray, edge, back, diff, back2, bob, bob2;
 	Mat fortesting;
+	Mat back_gray;
 
 	vector<Mat> foreground(ROTATION);
 	vector<Mat> background(ROTATION);
-	vector<Mat> test(ROTATION);
+	vector<Mat> min_back(ROTATION);
 	vector<Mat> temporary(ROTATION);
-	vector<Mat> test2(ROTATION);
+	vector<Mat> road_area(ROTATION);
 	vector<Mat> frames(ROTATION);
 
 	capture >> src;
@@ -53,8 +62,8 @@ int main(){
 			for (int i = 0; i < 3; i++){
 				frames[i] = src.clone();
 				temporary[i] = src.clone();
-				test[i] = src.clone();
-				test2[i] = src.clone();
+				min_back[i] = src.clone();
+				road_area[i] = src.clone();
 				foreground[i].create(Size(400, 300),0);
 				background[i].create(Size(400, 300),0);
 			}
@@ -69,22 +78,36 @@ int main(){
 		Sobel(back2, back2, CV_8U, 1, 0, 3);
 		back2 = back2 > 128;
 
-		printf("%d\n", countNonZero(edge));
+		//printf("%d\n", countNonZero(edge));
 
-		if (countNonZero(edge) < countNonZero(back2)*0.7 && flag >= 30){
+		if (((countNonZero(edge) < countNonZero(back2)*0.5) || (countNonZero(edge) > countNonZero(back2)*1.5)) && flag >= 30){
 			flag = 1;
 			temporary[number] = back.clone();
 			number++;
 			number = number % ROTATION;
-			printf("=====================%d====================\n", number+1);
+			printf("===============ROTATION %d====================\n", number+1);
 		}
 
 
 		if (flag >= 20){
 			vc[number](frames[number], foreground[number]);
 			(vc + number)->getBackgroundImage(background[number]);
-		}
+			cvtColor(background[number], back_gray, CV_BGR2GRAY);
+			Canny(back_gray, back_gray, 50, 100);
+			
+			if (countNonZero(back_gray) < min[number]){
+				cout << "[" << number << "]" << "Updated: " << countNonZero(back_gray) << endl;
+				min[number] = countNonZero(back_gray);
+				min_back[number] = background[number].clone();
+				road_area[number] = nonedge_area(back_gray, 0.3, 10);
+				
+				imshow("BOX1", road_area[number]);
 
+			}
+
+		}
+		
+		//box, box3, lab_back, Scalar(mean), filter(LAB), filter(RGB), COLOR_MASK(LAB+RGB)
 
 		char str[200];
 		sprintf(str, "%d", number + 1);
@@ -95,37 +118,22 @@ int main(){
 		imshow("RESULT", src);
 		//imshow("Canny", edge);
 		
-		imshow("VECTORTEST1", frames[0]);
-		imshow("VECTORTEST2", frames[1]);
-		imshow("VECTORTEST3", frames[2]);
+		//imshow("VECTORTEST1", frames[0]);
+		//imshow("VECTORTEST2", frames[1]);
+		//imshow("VECTORTEST3", frames[2]);
 		
-		imshow("Fore1", foreground[0]);
+		/*imshow("Fore1", foreground[0]);
 		imshow("Fore2", foreground[1]);
 		imshow("Fore3", foreground[2]);
-
+*/
 		//imshow("TESTING", fortesting);
-		imshow("Back1", background[0]);
-		imshow("Back2", background[1]);
-		imshow("Back3", background[2]);
+		//imshow("Back1", background[0]);
+		//imshow("Back2", background[1]);
+		//imshow("Back3", background[2]);
 
-
-		
-		test[0] = frames[0] - temporary[0];
-		test[1] = frames[1]-temporary[1];
-		test[2] = frames[2]-temporary[2];
-
-		
-		//imshow("T1", temporary[0]);
-
-		cvtColor(test[0], test[0], CV_BGR2GRAY);
-		Canny(test[0], test[0], 50, 100);
-		//imshow("TEST1", test[0]);
-		//imshow("T2", temporary[1]);
-		//imshow("T3", temporary[2]);
-	
-		
-		/*absdiff(src, back, diff);
-		imshow("diff", diff);*/
+		imshow("min_back[1]", min_back[0]);
+		imshow("min_back[2]", min_back[1]);
+		imshow("min_back[3]", min_back[2]);
 
 		key = waitKey(frame_rate);
 
