@@ -15,16 +15,50 @@ LabBgrMask -> 배경화면의 Lab와 Bgr 값의 표준편차로 Mask를 씌우는 함수.
 using namespace cv;
 Point2f A, B;
 
+//! Normalization the matrix.
 Mat Normalization(Mat src);
+
+//! Find largest area using canny image
 Mat FindLargestArea(Mat origin, Mat cannies);
+
+/*
+! Find Non edge area for road detection.
+Mat src :  원본 영상(에지처리후->2진화영상으로 변환된 영상이어야함.
+float sky_rate : 하늘에 해당하는 비율 (ex/ 0.3 : 상위 30%를 무시한다)
+int window_size : 윈도우의 크기 : 낮을수록 정밀하게 검색.
+*/
 Mat nonedge_area(Mat src, float sky_rate, int window_size);
+
+//! In Lab Color space, Filtering only L's value with sigma
 Mat roadFilter(const Mat& src, double sigma, Mat mask);
+
+//! BGR Color Space Filter with Sigma
 Mat roadFilter2(const Mat& src, double sigma, Mat mask);
+
+//! Show various color space's Scalar value on clicked pixel
 void callBackFunc2(int event, int x, int y, int flags, void* userdata);
-Mat LabBgrMask(Mat origin, Mat background);//Input: Background Matrix, Output: Mask Road Image
+
+//! Find road area using similar 'LAB & BGR' in largest non edge area.
+Mat FindRoad(Mat src);
+
 int ifLRline(Point2f A, Point2f B, Point2f P);
 bool intersection(Point2f o1, Point2f p1, Point2f o2, Point2f p2, Point2f &r);
-double dist(Point2f A, Point2f B);
 void OpticalFlow_Count(int Pnum, vector<uchar> status, int & Car_num, Mat& frame, Point2f & pass, vector<Point2f> after, vector<Point2f> Center, Point2f A, Point2f B);
+
+//! Calc distance between two Points.
+double dist(Point2f A, Point2f B);
+
+//! Detect and draw contour in Haar cascade's XML.
 void detect_haarcascades(Mat src, string path="");//Input source & Input Cascade XML's path.
+
+//! Distribute matrix to SEG_SIZE's matrixs and compare histogram between Origin and compare1,2,3
 Mat DistHisto(Mat Origin, Mat compare1, Mat compare2, Mat compare3, int SEG_SIZE);//Distribute Histogram Compare
+
+/* 
+! Calculate prime and secondary bin of edge direction. 1st, 2nd bin will return, not edge direction.
+Origin is the source matrix, NumBins is the degree bin(divide 180 degree with NumBins), and Line_threshold is the minimum HoughLine's value.
+*/
+int* CalcEdgeDirection(Mat Origin, int NumBins, int Line_threshold);
+
+//! Distribute matrix to SEG_SIZE's matrix and compare Edge direction's portion with Origin to compare 1,2,3.
+Mat DistEdgeCompare(Mat Origin, Mat compare1, Mat compare2, Mat compare3, int SEG_SIZE);

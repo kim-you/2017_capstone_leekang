@@ -10,6 +10,7 @@ Winter Vacation Proeject
 #include <stdio.h>
 #include <stdlib.h>
 #include <iostream>
+#include <functional>
 
 using namespace cv;
 using namespace std;
@@ -261,12 +262,12 @@ void callBackFunc2(int event, int x, int y, int flags, void* userdata){
 
 }
 
-Mat LabBgrMask(Mat origin, Mat background){
+Mat FindRoad(Mat src){
 
 	Mat back, canny, gray;
 	Mat box, box3, lab_back, filter, box4, Color_Mask;
 
-	back = background.clone();
+	back = src.clone();
 
 	cvtColor(back, gray, CV_RGB2GRAY);
 	GaussianBlur(gray, gray, Size(7, 7), 0, 0);
@@ -274,7 +275,7 @@ Mat LabBgrMask(Mat origin, Mat background){
 	imshow("CANNY", canny);
 	box = nonedge_area(canny, 0.3, 20);
 	imshow("BOX", box);
-	box3 = FindLargestArea(origin, box); // this is the mask
+	box3 = FindLargestArea(src, box); // this is the mask
 
 	//Input Lab Matrix && Largest Area's Mask.
 
@@ -295,7 +296,6 @@ Mat LabBgrMask(Mat origin, Mat background){
 
 bool intersection(Point2f o1, Point2f p1, Point2f o2, Point2f p2, Point2f &r)
 {
-
 
 	Point2f x = o2 - o1;
 	Point2f d1 = p1 - o1;
@@ -512,12 +512,12 @@ Mat DistHisto(Mat Origin, Mat compare1, Mat compare2, Mat compare3, int SEG_SIZE
 	int Mat_row = Origin.rows / SEG_SIZE + 1;
 	int Mat_col = Origin.cols / SEG_SIZE + 1;
 
-	if (Origin.rows / SEG_SIZE == 0){
-		int Mat_row = Origin.rows / SEG_SIZE;
+	if (Origin.rows % SEG_SIZE == 0){
+		Mat_row = Origin.rows / SEG_SIZE;
 	}
 
-	if (Origin.cols / SEG_SIZE == 0){
-		int Mat_col = Origin.cols / SEG_SIZE;
+	if (Origin.cols % SEG_SIZE == 0){
+		Mat_col = Origin.cols / SEG_SIZE;
 	}
 
 
@@ -538,7 +538,7 @@ Mat DistHisto(Mat Origin, Mat compare1, Mat compare2, Mat compare3, int SEG_SIZE
 	for (int z = 0; z < Mat_col; z++)
 		temporary4[z] = new Mat[Mat_row];
 
-	printf("Matrix [%d x %d] Allocated \n", Mat_col, Mat_row);
+	//printf("Matrix [%d x %d] Allocated \n", Mat_col, Mat_row);
 
 	//Dynamic Allocate Mat[][]
 	for (int i = 0; i < src_base.cols; i = i + SEG_SIZE){
@@ -546,7 +546,7 @@ Mat DistHisto(Mat Origin, Mat compare1, Mat compare2, Mat compare3, int SEG_SIZE
 
 		for (int j = 0; j < src_base.rows; j = j + SEG_SIZE){
 
-			printf("%d and %d\n", i, j);
+		//	printf("%d and %d\n", i, j);
 
 			if ((src_base.rows - j) < SEG_SIZE && (src_base.cols - i) < SEG_SIZE){
 				temporary[i / SEG_SIZE][j / SEG_SIZE] = hsv_base(Range(j, j + (src_base.rows%SEG_SIZE)), Range(i, i + (src_base.cols%SEG_SIZE - 1)));
@@ -626,7 +626,7 @@ Mat DistHisto(Mat Origin, Mat compare1, Mat compare2, Mat compare3, int SEG_SIZE
 
 		for (int j = 0; j < Mat_row; j++){
 			char str[200];
-			printf("Loop %d %d\n", i, j);
+		//	printf("Loop %d %d\n", i, j);
 			hsv_base = temporary[i][j].clone();
 			hsv_base1 = temporary4[i][j].clone();
 			hsv_test1 = temporary2[i][j].clone();
@@ -661,8 +661,8 @@ Mat DistHisto(Mat Origin, Mat compare1, Mat compare2, Mat compare3, int SEG_SIZE
 				if (base_test2 > 0.5)
 					match2++;
 
-				printf("Check!\n");
-				printf("Base-Test(0) Base-Test(1), Base-Test(2) : %f, %f, %f \n", base_test0, base_test1, base_test2);
+			//	printf("Check!\n");
+			//	printf("Base-Test(0) Base-Test(1), Base-Test(2) : %f, %f, %f \n", base_test0, base_test1, base_test2);
 				//imshow("T1", temporary[i][j]);
 				//imshow("T2", temporary2[i][j]);
 				//imshow("T3", temporary3[i][j]);
@@ -672,7 +672,7 @@ Mat DistHisto(Mat Origin, Mat compare1, Mat compare2, Mat compare3, int SEG_SIZE
 			}
 
 			max_base = MAX(base_test0, MAX(base_test1, base_test2));
-			cout << "MAXIMUM : " << max_base << endl;
+		//	cout << "MAXIMUM : " << max_base << endl;
 
 			if (max_base == base_test0){
 				putText(src_line, "1", Point(i*SEG_SIZE + SEG_SIZE / 2, j*SEG_SIZE + SEG_SIZE / 2), 1, 1, Scalar(0, 255, 0), 2, 4, false);
@@ -688,14 +688,14 @@ Mat DistHisto(Mat Origin, Mat compare1, Mat compare2, Mat compare3, int SEG_SIZE
 			}
 
 
-			printf("Base-Test(0) Base-Test(1), Base-Test(2) : %f, %f, %f \n", base_test0, base_test1, base_test2);
-			cout << "==================================================\n" << endl;
+//			printf("Base-Test(0) Base-Test(1), Base-Test(2) : %f, %f, %f \n", base_test0, base_test1, base_test2);
+	//		cout << "==================================================\n" << endl;
 		}
 
 	}
-	printf("=============The Match portion==================\n Test0 = %d / TEST1 = %d / Test2 = %d\n", match0, match1, match2);
+	printf("=================Histo portion==================\n Test0 = %d / TEST1 = %d / Test2 = %d\n", match0, match1, match2);
 
-	imshow("Line", src_line);
+	imshow("HISTOLINE", src_line);
 
 	for (int z = 0; z < Mat_col; ++z){
 		delete[] temporary[z];
@@ -715,5 +715,343 @@ Mat DistHisto(Mat Origin, Mat compare1, Mat compare2, Mat compare3, int SEG_SIZE
 	if (max_match == match2)
 		return compare3;
 
+
+}
+
+int* CalcEdgeDirection(Mat Origin, int NumBins, int Line_threshold){
+
+	Mat src = Origin.clone();
+	Mat gray, sobel_x, sobel_y, result;
+	Mat canny;
+
+	int bin_degree = 90 / NumBins;
+
+	vector<int> bin_hist(NumBins * 2);
+
+
+	double tan_val = 0;
+	int test = 0;
+	int count = 1;
+
+	cvtColor(src, gray, CV_BGR2GRAY);
+	
+	Canny(gray, canny, 50, 100);
+
+	vector<Vec4i> lines;
+	HoughLinesP(canny, lines, 1, CV_PI / 180, Line_threshold);
+
+	for (int i = 0; i < lines.size(); i++){
+
+		//		printf("%d\n", count);
+
+		Vec4i l = lines[i];
+		line(src, Point(l[0], l[1]), Point(l[2], l[3]), Scalar(0, 255, 255), 1);
+		//printf("1. [%d][%d]\n", l[0], l[1]);
+		//printf("2. [%d][%d]\n", l[2], l[3]);
+		tan_val = atan(double((l[3] - l[1])) / double((-1)*(l[2] - l[0])))*(180 / CV_PI);
+
+		for (int z = NumBins*(-1); z < NumBins; z++){
+
+			if (z*bin_degree < int(tan_val) && int(tan_val) < (z + 1)*bin_degree)
+				bin_hist[z + NumBins]++;
+
+		}
+
+		//printf("ATAN = %lf\n", tan_val);
+
+		count++;
+	}
+
+	vector<int> temporary(NumBins * 2);
+
+	temporary = bin_hist;
+
+	sort(temporary.begin(), temporary.end(), greater<>());
+	
+	int temp_flag = 0;	
+	int maximum = 0;
+	int maximum2 = 0;
+
+	for (int z = NumBins*(-1); z < NumBins; z++){
+		
+	//	printf("NumBin[%d] (%d ~  %d) = %d\n", z + NumBins, z*bin_degree, (z + 1)*bin_degree, bin_hist[z + NumBins]);
+
+		if (bin_hist[z + NumBins] == temporary[0] && temp_flag==0){
+			maximum = z + NumBins;
+			temp_flag++;
+		}
+		else if (bin_hist[z + NumBins] == temporary[1]){
+			maximum2 = z + NumBins;
+		}
+	
+	}
+
+	//printf("MAXIMUM = %d, 2_MAXIMUM = %d\n", maximum, maximum2);
+
+	int* t = new int[2];
+
+	t[0] = maximum;
+	t[1] = maximum2;
+
+	imshow("TEST", src);
+	imshow("CANNY2", canny);
+
+	return t;
+
+}
+
+
+
+Mat DistEdgeCompare(Mat Origin, Mat compare1, Mat compare2, Mat compare3, int SEG_SIZE){
+
+
+	Mat src_base, src_base1;
+	Mat src_test1;
+	Mat src_test2;
+	
+	int match0 = 0;
+	int match1 = 0;
+	int match2 = 0;
+
+	int match0_1 = 0;
+	int match1_1 = 0;
+	int match2_1 = 0;
+
+	int test1 = 0;
+	int test2 = 0;
+	int test3 = 0;
+	int test4 = 0;
+
+	src_base = Origin.clone();
+	src_base1 = compare1.clone();
+	src_test1 = compare2.clone();
+	src_test2 = compare3.clone();
+
+	Mat src_line = src_base.clone();
+
+	//Allocate Array Size
+	int Mat_row = Origin.rows / SEG_SIZE + 1;
+	int Mat_col = Origin.cols / SEG_SIZE + 1;
+
+	if (Origin.rows % SEG_SIZE == 0){
+		Mat_row = Origin.rows / SEG_SIZE;
+	}
+
+	if (Origin.cols % SEG_SIZE == 0){
+		Mat_col = Origin.cols / SEG_SIZE;
+	}
+
+	//Dynamic Allocation.
+	Mat **temporary = new Mat*[Mat_col];
+	for (int z = 0; z < Mat_col; z++)
+		temporary[z] = new Mat[Mat_row];
+
+	Mat **temporary2 = new Mat*[Mat_col];
+	for (int z = 0; z < Mat_col; z++)
+		temporary2[z] = new Mat[Mat_row];
+
+	Mat **temporary3 = new Mat*[Mat_col];
+	for (int z = 0; z < Mat_col; z++)
+		temporary3[z] = new Mat[Mat_row];
+
+	Mat **temporary4 = new Mat*[Mat_col];
+	for (int z = 0; z < Mat_col; z++)
+		temporary4[z] = new Mat[Mat_row];
+
+	//printf("Matrix [%d x %d] Allocated \n", Mat_col, Mat_row);
+
+	//Dynamic Allocate Mat[][]
+	for (int i = 0; i < src_base.cols; i = i + SEG_SIZE){
+		for (int j = 0; j < src_base.rows; j = j + SEG_SIZE){
+
+			//printf("%d and %d\n", i, j);
+
+			if ((src_base.rows - j) < SEG_SIZE && (src_base.cols - i) < SEG_SIZE){
+				temporary[i / SEG_SIZE][j / SEG_SIZE] = src_base(Range(j, j + (src_base.rows%SEG_SIZE)), Range(i, i + (src_base.cols%SEG_SIZE - 1)));
+				temporary2[i / SEG_SIZE][j / SEG_SIZE] = src_test1(Range(j, j + (src_base.rows%SEG_SIZE)), Range(i, i + (src_base.cols%SEG_SIZE - 1)));
+				temporary3[i / SEG_SIZE][j / SEG_SIZE] = src_test2(Range(j, j + (src_base.rows%SEG_SIZE)), Range(i, i + (src_base.cols%SEG_SIZE - 1)));
+				temporary4[i / SEG_SIZE][j / SEG_SIZE] = src_base1(Range(j, j + (src_base.rows%SEG_SIZE)), Range(i, i + (src_base.cols%SEG_SIZE - 1)));
+
+			}
+			else if ((src_base.rows - j) < SEG_SIZE){
+				temporary[i / SEG_SIZE][j / SEG_SIZE] = src_base(Range(j, j + (src_base.rows%SEG_SIZE)), Range(i, i + SEG_SIZE));
+				temporary2[i / SEG_SIZE][j / SEG_SIZE] = src_test1(Range(j, j + (src_base.rows%SEG_SIZE)), Range(i, i + SEG_SIZE));
+				temporary3[i / SEG_SIZE][j / SEG_SIZE] = src_test2(Range(j, j + (src_base.rows%SEG_SIZE)), Range(i, i + SEG_SIZE));
+				temporary4[i / SEG_SIZE][j / SEG_SIZE] = src_base1(Range(j, j + (src_base.rows%SEG_SIZE)), Range(i, i + SEG_SIZE));
+			}
+
+			else if ((src_base.cols - i) < SEG_SIZE){
+				temporary[i / SEG_SIZE][j / SEG_SIZE] = src_base(Range(j, j + SEG_SIZE), Range(i, i + (src_base.cols%SEG_SIZE - 1)));
+				temporary2[i / SEG_SIZE][j / SEG_SIZE] = src_test1(Range(j, j + SEG_SIZE), Range(i, i + (src_base.cols%SEG_SIZE - 1)));
+				temporary3[i / SEG_SIZE][j / SEG_SIZE] = src_test2(Range(j, j + SEG_SIZE), Range(i, i + (src_base.cols%SEG_SIZE - 1)));
+				temporary4[i / SEG_SIZE][j / SEG_SIZE] = src_base1(Range(j, j + SEG_SIZE), Range(i, i + (src_base.cols%SEG_SIZE - 1)));
+			}
+			else{
+				temporary[i / SEG_SIZE][j / SEG_SIZE] = src_base(Range(j, j + SEG_SIZE), Range(i, i + SEG_SIZE));
+				temporary2[i / SEG_SIZE][j / SEG_SIZE] = src_test1(Range(j, j + SEG_SIZE), Range(i, i + SEG_SIZE));
+				temporary3[i / SEG_SIZE][j / SEG_SIZE] = src_test2(Range(j, j + SEG_SIZE), Range(i, i + SEG_SIZE));
+				temporary4[i / SEG_SIZE][j / SEG_SIZE] = src_base1(Range(j, j + SEG_SIZE), Range(i, i + SEG_SIZE));
+			}
+
+		}
+
+	}
+
+	//Check for Calc Edge Direction.
+	int* ED_src;
+	int* ED_src2;
+	int* ED_src3;
+	int* ED_src4;
+
+	int max_base = 0;
+	int max_base_1 = 0;
+
+	//Draw Line Image for comparision.
+	for (int i = 0; i < src_base.cols; i = i + SEG_SIZE){
+		line(src_line, Point(i, 0), Point(i, src_base.rows), Scalar(0, 255, 255), 1, 4);
+		//line(test_mask, Point(i, 0), Point(i, src_base.rows), Scalar(0, 255, 255), 1, 4);
+	}
+
+	for (int j = 0; j < src_base.rows; j = j + SEG_SIZE){
+		line(src_line, Point(0, j), Point(src_base.cols, j), Scalar(0, 255, 255), 1, 4);
+		//line(test_mask, Point(0, j), Point(src_base.cols, j), Scalar(0, 255, 255), 1, 4);
+	}
+
+	for (int i = 0; i < Mat_col; i++){	
+	
+		for (int j = 0; j < Mat_row; j++){
+			
+			char str[200];
+		//	printf("Loop %d %d\n", i, j);
+			ED_src = CalcEdgeDirection(temporary[i][j], 3, SEG_SIZE / 10);
+			ED_src2 = CalcEdgeDirection(temporary4[i][j], 3, SEG_SIZE / 10);
+			ED_src3 = CalcEdgeDirection(temporary2[i][j], 3, SEG_SIZE / 10);
+			ED_src4 = CalcEdgeDirection(temporary3[i][j], 3, SEG_SIZE / 10);
+
+			for (int z = 0; z < 2; z++){
+		//		printf("CHECK[%d] %d %d %d %d\n", z, ED_src[z], ED_src2[z], ED_src3[z], ED_src4[z]);
+			}
+	
+			if (ED_src[0] == ED_src2[0])
+				match0++;
+			if (ED_src[0] == ED_src3[0])
+				match1++;
+			if (ED_src[0] == ED_src4[0])
+				match2++;
+			if (ED_src[1] == ED_src2[1])
+				match0_1++;
+			if (ED_src[1] == ED_src3[1])
+				match1_1++;
+			if (ED_src[1] == ED_src4[1])
+				match2_1++;
+		
+
+			if (match0 == match1 || match1 == match2 || match0 == match2){
+				
+				if (ED_src[1] == ED_src2[1] && ED_src[0] == ED_src2[0]){
+					putText(src_line, "1", Point(i*SEG_SIZE + SEG_SIZE / 2, j*SEG_SIZE + SEG_SIZE / 2), 1, 1, Scalar(0, 255, 0), 2, 4, false);
+					//printf("1 is the best match\n");
+					test1++;
+					//putText(test_mask, "1", Point(i*SEG_SIZE + SEG_SIZE / 2, j*SEG_SIZE + SEG_SIZE / 2), 1, 1, Scalar(0, 255, 0), 2, 4, false);
+				}
+				else if (ED_src[1] == ED_src3[1] && ED_src[0] == ED_src3[0]){
+					putText(src_line, "2", Point(i*SEG_SIZE + SEG_SIZE / 2, j*SEG_SIZE + SEG_SIZE / 2), 1, 1, Scalar(255, 0, 0), 2, 4, false);
+					//printf("2 is the best match\n");
+					test2++;
+					//putText(test_mask, "1", Point(i*SEG_SIZE + SEG_SIZE / 2, j*SEG_SIZE + SEG_SIZE / 2), 1, 1, Scalar(0, 255, 0), 2, 4, false);
+				}
+				else if (ED_src[1] == ED_src4[1] && ED_src[0] == ED_src4[0]){
+					putText(src_line, "3", Point(i*SEG_SIZE + SEG_SIZE / 2, j*SEG_SIZE + SEG_SIZE / 2), 1, 1, Scalar(0, 0, 255), 2, 4, false);
+				//	printf("3 is the best match\n");
+					test3++;
+					//putText(test_mask, "1", Point(i*SEG_SIZE + SEG_SIZE / 2, j*SEG_SIZE + SEG_SIZE / 2), 1, 1, Scalar(0, 255, 0), 2, 4, false);
+				}
+				else{
+					if (ED_src[0] == ED_src2[0]){
+						putText(src_line, "1", Point(i*SEG_SIZE + SEG_SIZE / 2, j*SEG_SIZE + SEG_SIZE / 2), 1, 1, Scalar(0, 255, 0), 2, 4, false);
+						//printf("1 is the best match\n");
+						test1++;
+						//putText(test_mask, "1", Point(i*SEG_SIZE + SEG_SIZE / 2, j*SEG_SIZE + SEG_SIZE / 2), 1, 1, Scalar(0, 255, 0), 2, 4, false);
+					}
+					else if (ED_src[0] == ED_src3[0]){
+						putText(src_line, "2", Point(i*SEG_SIZE + SEG_SIZE / 2, j*SEG_SIZE + SEG_SIZE / 2), 1, 1, Scalar(255, 0, 0), 2, 4, false);
+						//printf("2 is the best match\n");
+						test2++;
+						//putText(test_mask, "1", Point(i*SEG_SIZE + SEG_SIZE / 2, j*SEG_SIZE + SEG_SIZE / 2), 1, 1, Scalar(0, 255, 0), 2, 4, false);
+					}
+					else if (ED_src[0] == ED_src4[0]){
+						putText(src_line, "3", Point(i*SEG_SIZE + SEG_SIZE / 2, j*SEG_SIZE + SEG_SIZE / 2), 1, 1, Scalar(0, 0, 255), 2, 4, false);
+						//printf("3 is the best match\n");
+						test3++;
+						//putText(test_mask, "1", Point(i*SEG_SIZE + SEG_SIZE / 2, j*SEG_SIZE + SEG_SIZE / 2), 1, 1, Scalar(0, 255, 0), 2, 4, false);
+					}
+					else{
+						putText(src_line, "X", Point(i*SEG_SIZE + SEG_SIZE / 2, j*SEG_SIZE + SEG_SIZE / 2), 1, 1, Scalar(255, 255, 255), 2, 4, false);
+					//	printf("NO MATCH\n");
+						test4++;
+					}
+				}
+			
+			}
+			else{
+				if (ED_src[0] == ED_src2[0]){
+					putText(src_line, "1", Point(i*SEG_SIZE + SEG_SIZE / 2, j*SEG_SIZE + SEG_SIZE / 2), 1, 1, Scalar(0, 255, 0), 2, 4, false);
+				//	printf("1 is the best match\n");
+					test1++;
+					//putText(test_mask, "1", Point(i*SEG_SIZE + SEG_SIZE / 2, j*SEG_SIZE + SEG_SIZE / 2), 1, 1, Scalar(0, 255, 0), 2, 4, false);
+				}
+				else if (ED_src[0] == ED_src3[0]){
+					putText(src_line, "2", Point(i*SEG_SIZE + SEG_SIZE / 2, j*SEG_SIZE + SEG_SIZE / 2), 1, 1, Scalar(255, 0, 0), 2, 4, false);
+				//	printf("2 is the best match\n");
+					test2++;
+					//putText(test_mask, "1", Point(i*SEG_SIZE + SEG_SIZE / 2, j*SEG_SIZE + SEG_SIZE / 2), 1, 1, Scalar(0, 255, 0), 2, 4, false);
+				}
+				else if (ED_src[0] == ED_src4[0]){
+					putText(src_line, "3", Point(i*SEG_SIZE + SEG_SIZE / 2, j*SEG_SIZE + SEG_SIZE / 2), 1, 1, Scalar(0, 0, 255), 2, 4, false);
+			//		printf("3 is the best match\n");
+					test3++;
+					//putText(test_mask, "1", Point(i*SEG_SIZE + SEG_SIZE / 2, j*SEG_SIZE + SEG_SIZE / 2), 1, 1, Scalar(0, 255, 0), 2, 4, false);
+				}
+				else{
+					putText(src_line, "X", Point(i*SEG_SIZE + SEG_SIZE / 2, j*SEG_SIZE + SEG_SIZE / 2), 1, 1, Scalar(255, 255, 255), 2, 4, false);
+				//	printf("NO MATCH\n");
+					test4++;
+				}
+			}
+
+			//printf("===============================================================\n");
+			match0 = 0;
+			match1 = 0;
+			match2 = 0;
+			match0_1 = 0;
+			match1_1 = 0;
+			match2_1 = 0;
+
+		}
+
+	}
+	
+	imshow("EDGELine", src_line);
+
+	printf("=================Edge Portion===================\n");
+	printf("(1) %d, (2) %d, (3) %d, (N) %d\n", test1, test2, test3, test4);
+
+	for (int z = 0; z < Mat_col; ++z){
+		delete[] temporary[z];
+		delete[] temporary2[z];
+		delete[] temporary3[z];
+		delete[] temporary4[z];
+	}
+
+	int max_match = MAX(match0, MAX(match1, match2));
+
+	if (max_match == match0)
+		return compare1;
+
+	if (max_match == match1)
+		return compare2;
+
+	if (max_match == match2)
+		return compare3;
 
 }
