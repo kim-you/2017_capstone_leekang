@@ -56,9 +56,30 @@ Mat DistHisto(Mat Origin, Mat compare1, Mat compare2, Mat compare3, int SEG_SIZE
 
 /* 
 ! Calculate prime and secondary bin of edge direction. 1st, 2nd bin will return, not edge direction.
-Origin is the source matrix, NumBins is the degree bin(divide 180 degree with NumBins), and Line_threshold is the minimum HoughLine's value.
+Origin is the source matrix, NumBins is the degree bin(divide 180 degree with NumBins).
 */
-int* CalcEdgeDirection(Mat Origin, int NumBins, int Line_threshold);
+int* calcEdgeDirection(Mat Origin, int NumBins);
+
+//! ÀÚÃ¼ HOG
+int* calcEdgeDirection2(Mat Origin, int NumBins);
 
 //! Distribute matrix to SEG_SIZE's matrix and compare Edge direction's portion with Origin to compare 1,2,3.
 Mat DistEdgeCompare(Mat Origin, Mat compare1, Mat compare2, Mat compare3, int SEG_SIZE);
+
+//! Using calcEdgeDirection2
+Mat DistEdgeCompare2(Mat Origin, Mat compare1, Mat compare2, Mat compare3, int SEG_SIZE);
+
+//! Split matrix , check Edge direction.
+void splitEdgeDirection(Mat Origin, int BIN_SIZE, int SEG_SIZE=0);
+
+//! Check Direction where mouse clicked.
+void callBackFunc3(int event, int x, int y, int flags, void* userdata);
+
+//Vector Normalize.
+vector<float> nomalize(vector<float> a);
+
+//Direct area
+Mat direct_area(Mat src, int window_size, float sky_rate = 0);
+
+//For testing
+bool calcEdgeDirection3(Mat Origin, int NumBins);

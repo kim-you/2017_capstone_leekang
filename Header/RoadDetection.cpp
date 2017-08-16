@@ -15,7 +15,9 @@ Winter Vacation Proeject
 using namespace cv;
 using namespace std;
 
-int counts_number = 1;
+int edge_hist_num = 0;
+
+bool calcEdgeDirection3(Mat Origin, int NumBins);
 
 Mat FindLargestArea(Mat origin, Mat cannies){
 	Mat src;
@@ -70,6 +72,23 @@ Mat FindLargestArea(Mat origin, Mat cannies){
 	return source;
 }
 
+vector<float> nomalize(vector<float> a) {
+
+	float vecsize;
+
+	float k = 0;
+
+	for (int i = 0; i < a.size(); i++) {
+		k += a[i] * a[i];
+	}
+
+	for (int i = 0; i < a.size(); i++)
+		a[i] = a[i] / sqrtf(k);
+
+	return a;
+
+}
+
 Mat nonedge_area(Mat src, float sky_rate, int window_size) {
 	/*
 	Mat src :  원본 영상(에지처리후->2진화영상으로 변환된 영상이어야함.
@@ -89,20 +108,20 @@ Mat nonedge_area(Mat src, float sky_rate, int window_size) {
 
 	float m_height = src_height * sky_rate;
 
-	for (i = m_height; i + window_size <= src_height; i = i + window_size) {
+	for (i = m_height; i + window_size <= src_height; i = i + window_size/5) {
 		if (i + window_size >= src_height)
 			i2 = src_height;
 		else
 			i2 = i + window_size;
 
-		for (j = 0; j + window_size <= src_width; j = j + window_size) {
+		for (j = 0; j + window_size <= src_width; j = j + window_size/5) {
 			if (j + window_size >= src_width)
 				j2 = src_width;
 			else
 				j2 = j + window_size;
 
 			window = src(Range(i, i2), Range(j, j2));
-			if (sum(window) == Scalar(0))
+			if (sum(window) == Scalar(0)) // should be changed.
 				output(Range(i, i2), Range(j, j2)) = Scalar(255);
 		}
 	}
@@ -134,16 +153,16 @@ Mat roadFilter(const Mat& src, double sigma, Mat mask) {
 		dev_v[i] = dev.val[i];
 	}
 	//mask
-	printf("LAB MEAN %lf %lf %lf\n", mean_v[0], mean_v[1], mean_v[2]);
-	printf("LAB DEV %lf %lf %lf\n", dev_v[0], dev_v[1], dev_v[2]);
-	printf("SIGMA %lf %lf %lf\n", sigma_v[0], sigma_v[1], sigma_v[2]);
+	//printf("LAB MEAN %lf %lf %lf\n", mean_v[0], mean_v[1], mean_v[2]);
+	//printf("LAB DEV %lf %lf %lf\n", dev_v[0], dev_v[1], dev_v[2]);
+	//printf("SIGMA %lf %lf %lf\n", sigma_v[0], sigma_v[1], sigma_v[2]);
 
 	if ((sigma_v[1] + sigma_v[2]) <= 20){
 		sigma_v[1] = 7;
 		sigma_v[2] = 10;
 	}
 
-	printf("SIGMA_FIX %lf %lf %lf\n", sigma_v[0], sigma_v[1], sigma_v[2]);
+//	printf("SIGMA_FIX %lf %lf %lf\n", sigma_v[0], sigma_v[1], sigma_v[2]);
 	inRange(src, Scalar(mean_v[0] - 70, mean_v[1] - sigma_v[1], mean_v[2] - sigma_v[2]), Scalar(255, mean_v[1] + sigma_v[1], mean_v[2] + sigma_v[2]), filter); //Threshold the image
 
 	erode(filter, filter, getStructuringElement(MORPH_RECT, Size(10, 10)));
@@ -180,9 +199,9 @@ Mat roadFilter2(const Mat& src, double sigma, Mat mask) {
 		dev_v[i] = dev.val[i];
 	}
 	//mask
-	printf("BGR MEAN %lf %lf %lf\n", mean_v[0], mean_v[1], mean_v[2]);
-	printf("BGR DEV %lf %lf %lf\n", dev_v[0], dev_v[1], dev_v[2]);
-	printf("SIGMA %lf %lf %lf\n", sigma_v[0], sigma_v[1], sigma_v[2]);
+	//printf("BGR MEAN %lf %lf %lf\n", mean_v[0], mean_v[1], mean_v[2]);
+	//printf("BGR DEV %lf %lf %lf\n", dev_v[0], dev_v[1], dev_v[2]);
+	//printf("SIGMA %lf %lf %lf\n", sigma_v[0], sigma_v[1], sigma_v[2]);
 
 	inRange(src, Scalar(mean_v[0] - sigma_v[0], mean_v[1] - sigma_v[1], mean_v[2] - sigma_v[2]), Scalar(200, 200, 200), filter); //Threshold the image
 
@@ -219,7 +238,7 @@ Mat Normalization(Mat src){
 }
 
 void callBackFunc2(int event, int x, int y, int flags, void* userdata){
-
+	static int counts_number = 1;
 	/* When Mouse Click, Get Scalar Values on Clicked Point */
 
 	Mat src = *(Mat*)userdata;
@@ -267,16 +286,18 @@ Mat FindRoad(Mat src){
 	Mat back, canny, gray;
 	Mat box, box3, lab_back, filter, box4, Color_Mask;
 
-	back = src.clone();
-
+	//back = src.clone();
+	
+	bilateralFilter(src, back, 30, 60, 10);
+	
 	cvtColor(back, gray, CV_RGB2GRAY);
-	GaussianBlur(gray, gray, Size(7, 7), 0, 0);
+	//GaussianBlur(gray, gray, Size(7, 7), 0, 0);
 	Canny(gray, canny, 15, 25, 3);
-	imshow("CANNY", canny);
-	box = nonedge_area(canny, 0.3, 20);
-	imshow("BOX", box);
+	//imshow("CANNY", canny);
+	box = nonedge_area(canny, 0.3, 10);
+	//imshow("BOX", box);
 	box3 = FindLargestArea(src, box); // this is the mask
-
+	
 	//Input Lab Matrix && Largest Area's Mask.
 
 	cvtColor(back, lab_back, CV_BGR2Lab);
@@ -694,7 +715,7 @@ Mat DistHisto(Mat Origin, Mat compare1, Mat compare2, Mat compare3, int SEG_SIZE
 
 	}
 	printf("=================Histo portion==================\n Test0 = %d / TEST1 = %d / Test2 = %d\n", match0, match1, match2);
-
+	//imshow("TEST_HIST", hist_base);
 	imshow("HISTOLINE", src_line);
 
 	for (int z = 0; z < Mat_col; ++z){
@@ -718,83 +739,227 @@ Mat DistHisto(Mat Origin, Mat compare1, Mat compare2, Mat compare3, int SEG_SIZE
 
 }
 
-int* CalcEdgeDirection(Mat Origin, int NumBins, int Line_threshold){
+int* calcEdgeDirection(Mat Origin, int NumBins){
 
-	Mat src = Origin.clone();
-	Mat gray, sobel_x, sobel_y, result;
-	Mat canny;
+	Mat src, gray, sobel_x, sobel_y, result;
 
-	int bin_degree = 90 / NumBins;
+	src = Origin.clone();
 
-	vector<int> bin_hist(NumBins * 2);
+	//Dynamic allocation
+	vector<vector<float>> direction(src.cols, vector<float>(src.rows, 0));
 
+	int bin_degree = 360 / NumBins;
 
-	double tan_val = 0;
-	int test = 0;
-	int count = 1;
+	vector<int> bin_hist(NumBins);
 
 	cvtColor(src, gray, CV_BGR2GRAY);
+
+	//GaussianBlur(gray, gray, Size(3, 3), 0, 0);
+
+	//Sobel(gray, sobel_x, CV_8UC1, 1, 0, 3, 1, 0, BORDER_REPLICATE);
+	//Sobel(gray, sobel_y, CV_8UC1, 0, 1, 3, 1, 0, BORDER_REPLICATE);
+	Sobel(gray, sobel_x, CV_32FC1, 1, 0);
+	Sobel(gray, sobel_y, CV_32FC1, 0, 1);
+
+	//sobel_x.convertTo(sobel_x, CV_32FC1);
+
+	Mat Mag(gray.size(), CV_32FC1);
+	Mat Angle(gray.size(), CV_32FC1);
+
+	cartToPolar(sobel_y, sobel_x, Mag, Angle, true);
+
+	addWeighted(sobel_x, 0.5, sobel_y, 0.5, 0, result);
 	
-	Canny(gray, canny, 50, 100);
+	//imshow("RESULT", result);
 
-	vector<Vec4i> lines;
-	HoughLinesP(canny, lines, 1, CV_PI / 180, Line_threshold);
+	for (int i = 0; i < Angle.rows; i++){
 
-	for (int i = 0; i < lines.size(); i++){
+		for (int j = 0; j < Angle.cols; j++){
+			//cout << sobel_x.at<float>(i,j) << endl;
+			//cout << Angle.at<float>(i, j) << endl;
 
-		//		printf("%d\n", count);
+			//if (Mag.at<float>(i, j) >= 10){
+				direction[j][i] = Angle.at<float>(i, j);
+//			}
 
-		Vec4i l = lines[i];
-		line(src, Point(l[0], l[1]), Point(l[2], l[3]), Scalar(0, 255, 255), 1);
-		//printf("1. [%d][%d]\n", l[0], l[1]);
-		//printf("2. [%d][%d]\n", l[2], l[3]);
-		tan_val = atan(double((l[3] - l[1])) / double((-1)*(l[2] - l[0])))*(180 / CV_PI);
 
-		for (int z = NumBins*(-1); z < NumBins; z++){
-
-			if (z*bin_degree < int(tan_val) && int(tan_val) < (z + 1)*bin_degree)
-				bin_hist[z + NumBins]++;
+			for (int z = 0; z < NumBins; z++){
+				if (direction[j][i] > bin_degree*z && direction[j][i] <= bin_degree*(z + 1))
+					bin_hist[z]++;
+			}
 
 		}
-
-		//printf("ATAN = %lf\n", tan_val);
-
-		count++;
 	}
 
-	vector<int> temporary(NumBins * 2);
+
+
+	vector<int> temporary(NumBins);
 
 	temporary = bin_hist;
 
 	sort(temporary.begin(), temporary.end(), greater<>());
-	
+
 	int temp_flag = 0;	
 	int maximum = 0;
 	int maximum2 = 0;
 
-	for (int z = NumBins*(-1); z < NumBins; z++){
+	for (int z = 0; z < NumBins; z++){
 		
-	//	printf("NumBin[%d] (%d ~  %d) = %d\n", z + NumBins, z*bin_degree, (z + 1)*bin_degree, bin_hist[z + NumBins]);
+	//	printf("NumBin[%d] (%d ~  %d) = %d\n", z, z*bin_degree, (z + 1)*bin_degree, bin_hist[z]);
 
-		if (bin_hist[z + NumBins] == temporary[0] && temp_flag==0){
-			maximum = z + NumBins;
+		if (bin_hist[z] == temporary[0] && temp_flag==0){
+			maximum = z;
 			temp_flag++;
 		}
-		else if (bin_hist[z + NumBins] == temporary[1]){
-			maximum2 = z + NumBins;
+		else if (bin_hist[z] == temporary[1]){
+			maximum2 = z;
 		}
 	
 	}
 
-	//printf("MAXIMUM = %d, 2_MAXIMUM = %d\n", maximum, maximum2);
+//	printf("MAXIMUM = %d, 2_MAXIMUM = %d\n", maximum, maximum2);
 
 	int* t = new int[2];
 
 	t[0] = maximum;
 	t[1] = maximum2;
 
-	imshow("TEST", src);
-	imshow("CANNY2", canny);
+
+	//Deallocate 2 dimension Vector
+	for (int i = 0; i < direction.size(); i++)
+		direction[i].clear();
+
+	direction.clear();
+	temporary.clear();
+	bin_hist.clear();
+
+	return t;
+
+}
+
+int* calcEdgeDirection2(Mat Origin, int NumBins){
+
+	Mat src, gray, sobel_x, sobel_y, result, canny, mask_x, mask_y;
+
+	src = Origin.clone();
+
+	//Dynamic allocation
+	vector<vector<float>> direction(src.cols, vector<float>(src.rows, 0));
+
+	int bin_degree = 180 / NumBins;
+
+	vector<float> bin_hist(NumBins, 0);
+
+	cvtColor(src, gray, CV_BGR2GRAY);
+
+	Sobel(gray, sobel_x, CV_32FC1, 1, 0, -1);
+	Sobel(gray, sobel_y, CV_32FC1, 0, 1, -1);
+
+	Mat Mag(gray.size(), CV_32FC1);
+	Mat Angle(gray.size(), CV_32FC1);
+
+	//Canny(gray, canny, 50, 100);
+
+	//sobel_x.copyTo(mask_x, canny);
+	//sobel_y.copyTo(mask_y, canny);
+	//
+	//imshow("MASK_X", mask_x + mask_y);
+
+	
+	cartToPolar(sobel_y, sobel_x, Mag, Angle, true);
+
+
+	for (int i = 0; i < Angle.rows; i++){
+
+		for (int j = 0; j < Angle.cols; j++){
+
+			//cout << sobel_x.at<float>(i,j) << endl;
+			//cout << Angle.at<float>(i, j) << endl;
+
+			float tempangle = Angle.at<float>(i, j);
+
+			if (tempangle >= 180)
+				tempangle -= 180;
+
+			int a = tempangle / bin_degree;
+
+			float k = tempangle - (a*bin_degree);
+
+			float r = k / bin_degree;
+
+			float tempmag = Mag.at<float>(i, j);
+
+//			if (tempmag > 100)
+				//printf("Angle = %f, Magnitude = %f, BIN_HIST = %d\n", tempangle, tempmag, a);
+
+			bin_hist[a] += tempmag*(1 - r);
+
+			if ((a + 1) * 20 == 180){
+				bin_hist[0] += tempmag*r;
+			}
+			else{
+				bin_hist[a + 1] += tempmag*r;
+			}
+
+
+		}
+	}
+
+
+	vector<float> temporary(NumBins);
+
+	temporary = bin_hist;
+
+	sort(temporary.begin(), temporary.end(), greater<>());
+
+	int temp_flag = 0;
+	int maximum = 0;
+	int maximum2 = 0;
+	
+	float sum = 0;
+
+	vector<float> Normalized(NumBins);
+
+	for (int z = 0; z < NumBins; z++){
+
+		printf("NumBin[%d] (%d ~  %d) = %f\n", z, z*bin_degree, (z + 1)*bin_degree, bin_hist[z]);
+
+		sum += bin_hist[z];
+		
+		Normalized = nomalize(bin_hist);
+
+		if (bin_hist[z] == temporary[0] && temp_flag == 0){
+			maximum = z;
+			temp_flag++;
+		}
+		else if (bin_hist[z] == temporary[1]){
+			maximum2 = z;
+		}
+
+	}
+
+	
+	for (int i = 0; i < NumBins; i++){
+		printf("Normal[%d] = %lf\n", i, Normalized[i]);
+	}
+	
+	int* t = new int[2];
+
+	t[0] = maximum;
+	t[1] = maximum2;
+
+	printf("SUM = %f\n", sum);
+
+	for (int z = 0; z < NumBins; z++){
+		printf("PERCENT[%d] = %lf\n", z, bin_hist[z] / sum * float(100));
+	}
+	////Deallocate 2 dimension Vector
+	//for (int i = 0; i < src.cols; i++)
+	//	direction[i].clear();
+
+	//direction.clear();
+	//temporary.clear();
+	//bin_hist.clear();
 
 	return t;
 
@@ -923,10 +1088,10 @@ Mat DistEdgeCompare(Mat Origin, Mat compare1, Mat compare2, Mat compare3, int SE
 			
 			char str[200];
 		//	printf("Loop %d %d\n", i, j);
-			ED_src = CalcEdgeDirection(temporary[i][j], 3, SEG_SIZE / 10);
-			ED_src2 = CalcEdgeDirection(temporary4[i][j], 3, SEG_SIZE / 10);
-			ED_src3 = CalcEdgeDirection(temporary2[i][j], 3, SEG_SIZE / 10);
-			ED_src4 = CalcEdgeDirection(temporary3[i][j], 3, SEG_SIZE / 10);
+			ED_src = calcEdgeDirection(temporary[i][j], 9);
+			ED_src2 = calcEdgeDirection(temporary4[i][j], 9);
+			ED_src3 = calcEdgeDirection(temporary2[i][j], 9);
+			ED_src4 = calcEdgeDirection(temporary3[i][j], 9);
 
 			for (int z = 0; z < 2; z++){
 		//		printf("CHECK[%d] %d %d %d %d\n", z, ED_src[z], ED_src2[z], ED_src3[z], ED_src4[z]);
@@ -1053,5 +1218,661 @@ Mat DistEdgeCompare(Mat Origin, Mat compare1, Mat compare2, Mat compare3, int SE
 
 	if (max_match == match2)
 		return compare3;
+
+}
+
+
+Mat DistEdgeCompare2(Mat Origin, Mat compare1, Mat compare2, Mat compare3, int SEG_SIZE){
+
+
+	Mat src_base, src_base1;
+	Mat src_test1;
+	Mat src_test2;
+
+	int match0 = 0;
+	int match1 = 0;
+	int match2 = 0;
+
+	int match0_1 = 0;
+	int match1_1 = 0;
+	int match2_1 = 0;
+
+	int test1 = 0;
+	int test2 = 0;
+	int test3 = 0;
+	int test4 = 0;
+
+	src_base = Origin.clone();
+	src_base1 = compare1.clone();
+	src_test1 = compare2.clone();
+	src_test2 = compare3.clone();
+
+	Mat src_line = src_base.clone();
+
+	//Allocate Array Size
+	int Mat_row = Origin.rows / SEG_SIZE + 1;
+	int Mat_col = Origin.cols / SEG_SIZE + 1;
+
+	if (Origin.rows % SEG_SIZE == 0){
+		Mat_row = Origin.rows / SEG_SIZE;
+	}
+
+	if (Origin.cols % SEG_SIZE == 0){
+		Mat_col = Origin.cols / SEG_SIZE;
+	}
+
+	//Dynamic Allocation.
+	Mat **temporary = new Mat*[Mat_col];
+	for (int z = 0; z < Mat_col; z++)
+		temporary[z] = new Mat[Mat_row];
+
+	Mat **temporary2 = new Mat*[Mat_col];
+	for (int z = 0; z < Mat_col; z++)
+		temporary2[z] = new Mat[Mat_row];
+
+	Mat **temporary3 = new Mat*[Mat_col];
+	for (int z = 0; z < Mat_col; z++)
+		temporary3[z] = new Mat[Mat_row];
+
+	Mat **temporary4 = new Mat*[Mat_col];
+	for (int z = 0; z < Mat_col; z++)
+		temporary4[z] = new Mat[Mat_row];
+
+	//printf("Matrix [%d x %d] Allocated \n", Mat_col, Mat_row);
+
+	//Dynamic Allocate Mat[][]
+	for (int i = 0; i < src_base.cols; i = i + SEG_SIZE){
+		for (int j = 0; j < src_base.rows; j = j + SEG_SIZE){
+
+			//printf("%d and %d\n", i, j);
+
+			if ((src_base.rows - j) < SEG_SIZE && (src_base.cols - i) < SEG_SIZE){
+				temporary[i / SEG_SIZE][j / SEG_SIZE] = src_base(Range(j, j + (src_base.rows%SEG_SIZE)), Range(i, i + (src_base.cols%SEG_SIZE - 1)));
+				temporary2[i / SEG_SIZE][j / SEG_SIZE] = src_test1(Range(j, j + (src_base.rows%SEG_SIZE)), Range(i, i + (src_base.cols%SEG_SIZE - 1)));
+				temporary3[i / SEG_SIZE][j / SEG_SIZE] = src_test2(Range(j, j + (src_base.rows%SEG_SIZE)), Range(i, i + (src_base.cols%SEG_SIZE - 1)));
+				temporary4[i / SEG_SIZE][j / SEG_SIZE] = src_base1(Range(j, j + (src_base.rows%SEG_SIZE)), Range(i, i + (src_base.cols%SEG_SIZE - 1)));
+
+			}
+			else if ((src_base.rows - j) < SEG_SIZE){
+				temporary[i / SEG_SIZE][j / SEG_SIZE] = src_base(Range(j, j + (src_base.rows%SEG_SIZE)), Range(i, i + SEG_SIZE));
+				temporary2[i / SEG_SIZE][j / SEG_SIZE] = src_test1(Range(j, j + (src_base.rows%SEG_SIZE)), Range(i, i + SEG_SIZE));
+				temporary3[i / SEG_SIZE][j / SEG_SIZE] = src_test2(Range(j, j + (src_base.rows%SEG_SIZE)), Range(i, i + SEG_SIZE));
+				temporary4[i / SEG_SIZE][j / SEG_SIZE] = src_base1(Range(j, j + (src_base.rows%SEG_SIZE)), Range(i, i + SEG_SIZE));
+			}
+
+			else if ((src_base.cols - i) < SEG_SIZE){
+				temporary[i / SEG_SIZE][j / SEG_SIZE] = src_base(Range(j, j + SEG_SIZE), Range(i, i + (src_base.cols%SEG_SIZE - 1)));
+				temporary2[i / SEG_SIZE][j / SEG_SIZE] = src_test1(Range(j, j + SEG_SIZE), Range(i, i + (src_base.cols%SEG_SIZE - 1)));
+				temporary3[i / SEG_SIZE][j / SEG_SIZE] = src_test2(Range(j, j + SEG_SIZE), Range(i, i + (src_base.cols%SEG_SIZE - 1)));
+				temporary4[i / SEG_SIZE][j / SEG_SIZE] = src_base1(Range(j, j + SEG_SIZE), Range(i, i + (src_base.cols%SEG_SIZE - 1)));
+			}
+			else{
+				temporary[i / SEG_SIZE][j / SEG_SIZE] = src_base(Range(j, j + SEG_SIZE), Range(i, i + SEG_SIZE));
+				temporary2[i / SEG_SIZE][j / SEG_SIZE] = src_test1(Range(j, j + SEG_SIZE), Range(i, i + SEG_SIZE));
+				temporary3[i / SEG_SIZE][j / SEG_SIZE] = src_test2(Range(j, j + SEG_SIZE), Range(i, i + SEG_SIZE));
+				temporary4[i / SEG_SIZE][j / SEG_SIZE] = src_base1(Range(j, j + SEG_SIZE), Range(i, i + SEG_SIZE));
+			}
+
+		}
+
+	}
+
+	//Check for Calc Edge Direction.
+	int* ED_src;
+	int* ED_src2;
+	int* ED_src3;
+	int* ED_src4;
+
+	int max_base = 0;
+	int max_base_1 = 0;
+
+	//Draw Line Image for comparision.
+	for (int i = 0; i < src_base.cols; i = i + SEG_SIZE){
+		line(src_line, Point(i, 0), Point(i, src_base.rows), Scalar(0, 255, 255), 1, 4);
+		//line(test_mask, Point(i, 0), Point(i, src_base.rows), Scalar(0, 255, 255), 1, 4);
+	}
+
+	for (int j = 0; j < src_base.rows; j = j + SEG_SIZE){
+		line(src_line, Point(0, j), Point(src_base.cols, j), Scalar(0, 255, 255), 1, 4);
+		//line(test_mask, Point(0, j), Point(src_base.cols, j), Scalar(0, 255, 255), 1, 4);
+	}
+
+	for (int i = 0; i < Mat_col; i++){
+
+		for (int j = 0; j < Mat_row; j++){
+
+			char str[200];
+			//	printf("Loop %d %d\n", i, j);
+			ED_src = calcEdgeDirection2(temporary[i][j], 9);
+			ED_src2 = calcEdgeDirection2(temporary4[i][j], 9);
+			ED_src3 = calcEdgeDirection2(temporary2[i][j], 9);
+			ED_src4 = calcEdgeDirection2(temporary3[i][j], 9);
+
+			for (int z = 0; z < 2; z++){
+				//		printf("CHECK[%d] %d %d %d %d\n", z, ED_src[z], ED_src2[z], ED_src3[z], ED_src4[z]);
+			}
+
+			if (ED_src[0] == ED_src2[0])
+				match0++;
+			if (ED_src[0] == ED_src3[0])
+				match1++;
+			if (ED_src[0] == ED_src4[0])
+				match2++;
+			if (ED_src[1] == ED_src2[1])
+				match0_1++;
+			if (ED_src[1] == ED_src3[1])
+				match1_1++;
+			if (ED_src[1] == ED_src4[1])
+				match2_1++;
+
+
+			if (match0 == match1 || match1 == match2 || match0 == match2){
+
+				if (ED_src[1] == ED_src2[1] && ED_src[0] == ED_src2[0]){
+					putText(src_line, "1", Point(i*SEG_SIZE + SEG_SIZE / 2, j*SEG_SIZE + SEG_SIZE / 2), 1, 1, Scalar(0, 255, 0), 2, 4, false);
+					//printf("1 is the best match\n");
+					test1++;
+					//putText(test_mask, "1", Point(i*SEG_SIZE + SEG_SIZE / 2, j*SEG_SIZE + SEG_SIZE / 2), 1, 1, Scalar(0, 255, 0), 2, 4, false);
+				}
+				else if (ED_src[1] == ED_src3[1] && ED_src[0] == ED_src3[0]){
+					putText(src_line, "2", Point(i*SEG_SIZE + SEG_SIZE / 2, j*SEG_SIZE + SEG_SIZE / 2), 1, 1, Scalar(255, 0, 0), 2, 4, false);
+					//printf("2 is the best match\n");
+					test2++;
+					//putText(test_mask, "1", Point(i*SEG_SIZE + SEG_SIZE / 2, j*SEG_SIZE + SEG_SIZE / 2), 1, 1, Scalar(0, 255, 0), 2, 4, false);
+				}
+				else if (ED_src[1] == ED_src4[1] && ED_src[0] == ED_src4[0]){
+					putText(src_line, "3", Point(i*SEG_SIZE + SEG_SIZE / 2, j*SEG_SIZE + SEG_SIZE / 2), 1, 1, Scalar(0, 0, 255), 2, 4, false);
+					//	printf("3 is the best match\n");
+					test3++;
+					//putText(test_mask, "1", Point(i*SEG_SIZE + SEG_SIZE / 2, j*SEG_SIZE + SEG_SIZE / 2), 1, 1, Scalar(0, 255, 0), 2, 4, false);
+				}
+				else{
+					if (ED_src[0] == ED_src2[0]){
+						putText(src_line, "1", Point(i*SEG_SIZE + SEG_SIZE / 2, j*SEG_SIZE + SEG_SIZE / 2), 1, 1, Scalar(0, 255, 0), 2, 4, false);
+						//printf("1 is the best match\n");
+						test1++;
+						//putText(test_mask, "1", Point(i*SEG_SIZE + SEG_SIZE / 2, j*SEG_SIZE + SEG_SIZE / 2), 1, 1, Scalar(0, 255, 0), 2, 4, false);
+					}
+					else if (ED_src[0] == ED_src3[0]){
+						putText(src_line, "2", Point(i*SEG_SIZE + SEG_SIZE / 2, j*SEG_SIZE + SEG_SIZE / 2), 1, 1, Scalar(255, 0, 0), 2, 4, false);
+						//printf("2 is the best match\n");
+						test2++;
+						//putText(test_mask, "1", Point(i*SEG_SIZE + SEG_SIZE / 2, j*SEG_SIZE + SEG_SIZE / 2), 1, 1, Scalar(0, 255, 0), 2, 4, false);
+					}
+					else if (ED_src[0] == ED_src4[0]){
+						putText(src_line, "3", Point(i*SEG_SIZE + SEG_SIZE / 2, j*SEG_SIZE + SEG_SIZE / 2), 1, 1, Scalar(0, 0, 255), 2, 4, false);
+						//printf("3 is the best match\n");
+						test3++;
+						//putText(test_mask, "1", Point(i*SEG_SIZE + SEG_SIZE / 2, j*SEG_SIZE + SEG_SIZE / 2), 1, 1, Scalar(0, 255, 0), 2, 4, false);
+					}
+					else{
+						putText(src_line, "X", Point(i*SEG_SIZE + SEG_SIZE / 2, j*SEG_SIZE + SEG_SIZE / 2), 1, 1, Scalar(255, 255, 255), 2, 4, false);
+						//	printf("NO MATCH\n");
+						test4++;
+					}
+				}
+
+			}
+			else{
+				if (ED_src[0] == ED_src2[0]){
+					putText(src_line, "1", Point(i*SEG_SIZE + SEG_SIZE / 2, j*SEG_SIZE + SEG_SIZE / 2), 1, 1, Scalar(0, 255, 0), 2, 4, false);
+					//	printf("1 is the best match\n");
+					test1++;
+					//putText(test_mask, "1", Point(i*SEG_SIZE + SEG_SIZE / 2, j*SEG_SIZE + SEG_SIZE / 2), 1, 1, Scalar(0, 255, 0), 2, 4, false);
+				}
+				else if (ED_src[0] == ED_src3[0]){
+					putText(src_line, "2", Point(i*SEG_SIZE + SEG_SIZE / 2, j*SEG_SIZE + SEG_SIZE / 2), 1, 1, Scalar(255, 0, 0), 2, 4, false);
+					//	printf("2 is the best match\n");
+					test2++;
+					//putText(test_mask, "1", Point(i*SEG_SIZE + SEG_SIZE / 2, j*SEG_SIZE + SEG_SIZE / 2), 1, 1, Scalar(0, 255, 0), 2, 4, false);
+				}
+				else if (ED_src[0] == ED_src4[0]){
+					putText(src_line, "3", Point(i*SEG_SIZE + SEG_SIZE / 2, j*SEG_SIZE + SEG_SIZE / 2), 1, 1, Scalar(0, 0, 255), 2, 4, false);
+					//		printf("3 is the best match\n");
+					test3++;
+					//putText(test_mask, "1", Point(i*SEG_SIZE + SEG_SIZE / 2, j*SEG_SIZE + SEG_SIZE / 2), 1, 1, Scalar(0, 255, 0), 2, 4, false);
+				}
+				else{
+					putText(src_line, "X", Point(i*SEG_SIZE + SEG_SIZE / 2, j*SEG_SIZE + SEG_SIZE / 2), 1, 1, Scalar(255, 255, 255), 2, 4, false);
+					//	printf("NO MATCH\n");
+					test4++;
+				}
+			}
+
+			//printf("===============================================================\n");
+			match0 = 0;
+			match1 = 0;
+			match2 = 0;
+			match0_1 = 0;
+			match1_1 = 0;
+			match2_1 = 0;
+
+		}
+
+	}
+
+	imshow("EdgeLine2", src_line);
+
+
+	printf("=================Edge Portion===================\n");
+	printf("(1) %d, (2) %d, (3) %d, (N) %d\n", test1, test2, test3, test4);
+
+	for (int z = 0; z < Mat_col; ++z){
+		delete[] temporary[z];
+		delete[] temporary2[z];
+		delete[] temporary3[z];
+		delete[] temporary4[z];
+	}
+
+	int max_match = MAX(match0, MAX(match1, match2));
+
+	if (max_match == match0)
+		return compare1;
+
+	if (max_match == match1)
+		return compare2;
+
+	if (max_match == match2)
+		return compare3;
+
+}
+
+
+void splitEdgeDirection(Mat Origin, int BIN_SIZE, int SEG_SIZE=0){
+
+	Mat gray, sobel_x, sobel_y, result;
+	Mat src, canny, mask;
+
+	Mat src_base = Origin.clone();
+
+	bilateralFilter(Origin, src, 25, 30, 50);
+	cvtColor(src, gray, CV_BGR2GRAY);
+
+	Sobel(gray, sobel_x, CV_32F, 1, 0, 1);
+	Sobel(gray, sobel_y, CV_32F, 0, 1, 1);
+
+	//sobel_x.convertTo(sobel_x, CV_32FC1);
+	//imshow("asdfasdf", sobel_x);
+
+	Canny(gray, canny, 10, 20);
+	addWeighted(sobel_x, 0.5, sobel_y, 0.5, 0, result);
+
+	result.copyTo(mask, canny);
+
+
+	//imshow("RESULT2", mask);
+
+	if (SEG_SIZE == 0){
+		char str[200];
+
+		Mat src_line = Origin.clone();
+
+		int* check_direct;
+		
+		check_direct = calcEdgeDirection2(Origin, BIN_SIZE);
+		
+		edge_hist_num = check_direct[0];
+		
+		printf("==========================================\n");
+		//imshow("SPLIT_SRC", src);
+		imshow("SSPLIT_LINE", src_line);
+		
+	}
+	else{
+
+		//Allocate Array Size
+		int Mat_row = src.rows / SEG_SIZE + 1;
+		int Mat_col = src.cols / SEG_SIZE + 1;
+
+		if (src.rows % SEG_SIZE == 0){
+			Mat_row = src.rows / SEG_SIZE;
+		}
+
+		if (src.cols % SEG_SIZE == 0){
+			Mat_col = src.cols / SEG_SIZE;
+		}
+
+		//Dynamic Allocation.
+		Mat **temporary = new Mat*[Mat_col];
+
+
+		for (int z = 0; z < Mat_col; z++)
+			temporary[z] = new Mat[Mat_row];
+
+		//Dynamic Allocate Mat[][]
+		for (int i = 0; i < src_base.cols; i = i + SEG_SIZE){
+			for (int j = 0; j < src_base.rows; j = j + SEG_SIZE){
+
+				//printf("%d and %d\n", i, j);
+
+				if ((src_base.rows - j) < SEG_SIZE && (src_base.cols - i) < SEG_SIZE){
+					temporary[i / SEG_SIZE][j / SEG_SIZE] = src_base(Range(j, j + (src_base.rows%SEG_SIZE)), Range(i, i + (src_base.cols%SEG_SIZE - 1)));
+
+				}
+				else if ((src_base.rows - j) < SEG_SIZE){
+					temporary[i / SEG_SIZE][j / SEG_SIZE] = src_base(Range(j, j + (src_base.rows%SEG_SIZE)), Range(i, i + SEG_SIZE));
+				}
+
+				else if ((src_base.cols - i) < SEG_SIZE){
+					temporary[i / SEG_SIZE][j / SEG_SIZE] = src_base(Range(j, j + SEG_SIZE), Range(i, i + (src_base.cols%SEG_SIZE - 1)));
+				}
+				else{
+					temporary[i / SEG_SIZE][j / SEG_SIZE] = src_base(Range(j, j + SEG_SIZE), Range(i, i + SEG_SIZE));
+				}
+
+			}
+
+		}
+
+		Mat src_line = src_base.clone();
+
+		//Draw Line Image for comparision.
+		for (int i = 0; i < src_base.cols; i = i + SEG_SIZE){
+			line(src_line, Point(i, 0), Point(i, src_base.rows), Scalar(0, 255, 255), 1, 4);
+			//line(test_mask, Point(i, 0), Point(i, src_base.rows), Scalar(0, 255, 255), 1, 4);
+		}
+
+		for (int j = 0; j < src_base.rows; j = j + SEG_SIZE){
+			line(src_line, Point(0, j), Point(src_base.cols, j), Scalar(0, 255, 255), 1, 4);
+			//line(test_mask, Point(0, j), Point(src_base.cols, j), Scalar(0, 255, 255), 1, 4);
+		}
+
+		int* check_direct;
+
+		for (int i = 0; i < Mat_col; i++){
+
+			for (int j = 0; j < Mat_row; j++){
+
+				char str[200];
+				printf("[%d][%d]\n", i, j);
+				check_direct = calcEdgeDirection2(temporary[i][j], BIN_SIZE);
+
+				for (int z = 0; z < BIN_SIZE; z++){
+					sprintf(str, "%d", z);
+					float size = SEG_SIZE*0.3;
+					float size2 = SEG_SIZE*0.4;
+
+					if (check_direct[0] == z){
+						switch (z){
+						case -1:
+							putText(src_line, str, Point(i*SEG_SIZE + SEG_SIZE / 10, j*SEG_SIZE + SEG_SIZE / 2), 1, 1, Scalar(0, 0, 0), 1, 2, false);
+							break;
+						case 0:
+							//		rectangle(src_line, Rect(i*SEG_SIZE + size, j*SEG_SIZE + size, size2, size2), Scalar(255, 0, 0), -1);
+							putText(src_line, str, Point(i*SEG_SIZE + SEG_SIZE / 10, j*SEG_SIZE + SEG_SIZE / 2), 1, 1, Scalar(255, 0, 0), 1, 2, false);
+							break;
+						case 1:
+							//rectangle(src_line, Rect(i*SEG_SIZE + size, j*SEG_SIZE + size, size2, size2), Scalar(100, 0, 0), -1);
+							putText(src_line, str, Point(i*SEG_SIZE + SEG_SIZE / 10, j*SEG_SIZE + SEG_SIZE / 2), 1, 1, Scalar(0, 255, 0), 1, 2, false);
+							break;
+						case 2:
+							//rectangle(src_line, Rect(i*SEG_SIZE + size, j*SEG_SIZE + size, size2, size2), Scalar(0, 0, 0), -1);
+							putText(src_line, str, Point(i*SEG_SIZE + SEG_SIZE / 10, j*SEG_SIZE + SEG_SIZE / 2), 1, 1, Scalar(0, 0, 255), 1, 4, false);
+							break;
+						case 3:
+							//rectangle(src_line, Rect(i*SEG_SIZE + size, j*SEG_SIZE + size, size2, size2), Scalar(0, 255, 0), -1);
+							putText(src_line, str, Point(i*SEG_SIZE + SEG_SIZE / 10, j*SEG_SIZE + SEG_SIZE / 2), 1, 1, Scalar(255, 255, 0), 1, 4, false);
+							break;
+						case 4:
+							//rectangle(src_line, Rect(i*SEG_SIZE + size, j*SEG_SIZE + size, size2, size2), Scalar(0, 100, 0), -1);
+							putText(src_line, str, Point(i*SEG_SIZE + SEG_SIZE / 10, j*SEG_SIZE + SEG_SIZE / 2), 1, 1, Scalar(255, 0, 255), 1, 4, false);
+							break;
+						case 5:
+							//rectangle(src_line, Rect(i*SEG_SIZE + size, j*SEG_SIZE + size, size2, size2), Scalar(0, 0, 255), -1);
+							putText(src_line, str, Point(i*SEG_SIZE + SEG_SIZE / 10, j*SEG_SIZE + SEG_SIZE / 2), 1, 1, Scalar(0, 255, 255), 1, 4, false);
+							break;
+						case 6:
+							//rectangle(src_line, Rect(i*SEG_SIZE + size, j*SEG_SIZE + size, size2, size2), Scalar(0, 0, 100), -1);
+							putText(src_line, str, Point(i*SEG_SIZE + SEG_SIZE / 10, j*SEG_SIZE + SEG_SIZE / 2), 1, 1, Scalar(120, 120, 120), 1, 4, false);
+							break;
+						case 7:
+							//rectangle(src_line, Rect(i*SEG_SIZE + size, j*SEG_SIZE + size, size2, size2), Scalar(255, 255, 0), -1);
+							putText(src_line, str, Point(i*SEG_SIZE + SEG_SIZE / 10, j*SEG_SIZE + SEG_SIZE / 2), 1, 1, Scalar(120, 0, 0), 1, 4, false);
+							break;
+						case 8:
+							//rectangle(src_line, Rect(i*SEG_SIZE + size, j*SEG_SIZE + size, size2, size2), Scalar(100, 255, 0), -1);
+							putText(src_line, str, Point(i*SEG_SIZE + SEG_SIZE / 10, j*SEG_SIZE + SEG_SIZE / 2), 1, 1, Scalar(0, 120, 0), 1, 4, false);
+							break;
+						case 9:
+							//rectangle(src_line, Rect(i*SEG_SIZE + size, j*SEG_SIZE + size, size2, size2), Scalar(100, 100, 0), -1);
+							putText(src_line, str, Point(i*SEG_SIZE + SEG_SIZE / 10, j*SEG_SIZE + SEG_SIZE / 2), 1, 1, Scalar(0, 0, 120), 1, 4, false);
+							break;
+						case 10:
+							//rectangle(src_line, Rect(i*SEG_SIZE + size, j*SEG_SIZE + size, size2, size2), Scalar(255, 0, 255), -1);
+							putText(src_line, str, Point(i*SEG_SIZE + SEG_SIZE / 10, j*SEG_SIZE + SEG_SIZE / 2), 1, 1, Scalar(0, 120, 120), 1, 4, false);
+							break;
+						case 11:
+							//rectangle(src_line, Rect(i*SEG_SIZE + size, j*SEG_SIZE + size, size2, size2), Scalar(255, 0, 100), -1);
+							putText(src_line, str, Point(i*SEG_SIZE + SEG_SIZE / 10, j*SEG_SIZE + SEG_SIZE / 2), 1, 1, Scalar(120, 0, 120), 1, 4, false);
+							break;
+						case 12:
+							//rectangle(src_line, Rect(i*SEG_SIZE + size, j*SEG_SIZE + size, size2, size2), Scalar(100, 0, 100), -1);
+							putText(src_line, str, Point(i*SEG_SIZE + SEG_SIZE / 10, j*SEG_SIZE + SEG_SIZE / 2), 1, 1, Scalar(120, 120, 0), 1, 4, false);
+							break;
+						}
+					}
+				}
+
+			}
+		}
+
+		for (int z = 0; z < Mat_col; ++z){
+			delete[] temporary[z];
+		}
+
+		//imshow("SPLIT_SRC", src);
+		imshow("SPLIT_LINE", src_line);
+	}
+}
+
+
+
+void callBackFunc3(int event, int x, int y, int flags, void* userdata){
+	
+	static int counts_number = 1;
+	int SEG_SIZE = 15; //여기 크기 맞춰야됨.
+	
+	/* When Mouse Click, Get Scalar Values on Clicked Point */
+
+	Mat src = *(Mat*)userdata;
+	Mat src2 = src.clone();
+	Mat src_slice;
+
+
+
+
+
+	/*
+	src_base(Range(j, j + (src_base.rows%SEG_SIZE)), Range(i, i + (src_base.cols%SEG_SIZE - 1))
+	*/
+
+	switch (event){
+
+	case EVENT_LBUTTONDOWN:
+
+		printf("[%d]\n", counts_number);
+		src_slice = src(Range(y-SEG_SIZE/2, y + SEG_SIZE/2), Range(x-SEG_SIZE/2, x + SEG_SIZE/2));
+		
+		splitEdgeDirection(src_slice, 9);
+		
+		rectangle(src2, Point(x - SEG_SIZE/2, y - SEG_SIZE/2), Point(x + SEG_SIZE/2, y + SEG_SIZE/2), Scalar(0, 0, 255), 1, 8);
+
+		char str[200];
+		char str2[200];
+		sprintf(str, "%d", counts_number);
+		sprintf(str2, "%d", edge_hist_num);
+		
+		putText(src2, str, Point(x - SEG_SIZE/2, y - SEG_SIZE), 1, 1, Scalar(0, 0, 255));
+		putText(src2, str2, Point(x, y), 1, 1, Scalar(255, 255, 0));
+
+		imshow("CHECK_DIRECTION", src2);
+
+		counts_number++;
+
+		break;
+	}
+	
+	edge_hist_num = 0;
+
+}
+
+Mat direct_area(Mat src, int window_size, float sky_rate = 0) {
+	/*
+	Mat src :  원본 영상(에지처리후->2진화영상으로 변환된 영상이어야함.
+	float sky_rate : 하늘에 해당하는 비율 (ex/ 0.3 : 상위 30%를 무시한다)
+	int window_size : 윈도우의 크기 : 낮을수록 정밀하게 검색.
+	*/
+
+	int i, i2 = 0;
+	int j, j2 = 0;
+	int src_height, src_width;
+
+	src_height = src.rows;
+	src_width = src.cols;
+
+	Mat window;
+	Mat output(src_height, src_width, src.type(), Scalar(0));
+
+	float m_height = src_height * sky_rate;
+
+	for (i = m_height; i + window_size <= src_height; i = i + window_size / 10) {
+		if (i + window_size >= src_height)
+			i2 = src_height;
+		else
+			i2 = i + window_size;
+
+		for (j = 0; j + window_size <= src_width; j = j + window_size / 10) {
+			if (j + window_size >= src_width)
+				j2 = src_width;
+			else
+				j2 = j + window_size;
+
+			window = src(Range(i, i2), Range(j, j2));
+			
+			if (calcEdgeDirection3(window, 9)){
+				output(Range(i, i2), Range(j, j2)) += Scalar(50, 50, 50);
+			}
+			else{
+				output(Range(i, i2), Range(j, j2)) = Scalar(0, 0, 0);
+			}
+
+		}
+	}
+
+	return output;
+
+}
+
+
+
+bool calcEdgeDirection3(Mat Origin, int NumBins){
+
+	Mat src, gray, sobel_x, sobel_y, result, canny, mask_x, mask_y;
+
+	src = Origin.clone();
+
+	//Dynamic allocation
+	vector<vector<float>> direction(src.cols, vector<float>(src.rows, 0));
+
+	int bin_degree = 180 / NumBins;
+
+	vector<float> bin_hist(NumBins, 0);
+
+	cvtColor(src, gray, CV_BGR2GRAY);
+
+	Sobel(gray, sobel_x, CV_32FC1, 1, 0, -1);
+	Sobel(gray, sobel_y, CV_32FC1, 0, 1, -1);
+
+	Mat Mag(gray.size(), CV_32FC1);
+	Mat Angle(gray.size(), CV_32FC1);
+
+	//Canny(gray, canny, 50, 100);
+
+	//sobel_x.copyTo(mask_x, canny);
+	//sobel_y.copyTo(mask_y, canny);
+	//
+	//imshow("MASK_X", mask_x + mask_y);
+
+
+	cartToPolar(sobel_y, sobel_x, Mag, Angle, true);
+
+
+	for (int i = 0; i < Angle.rows; i++){
+
+		for (int j = 0; j < Angle.cols; j++){
+
+			//cout << sobel_x.at<float>(i,j) << endl;
+			//cout << Angle.at<float>(i, j) << endl;
+
+			float tempangle = Angle.at<float>(i, j);
+
+			if (tempangle >= 180)
+				tempangle -= 180;
+
+			int a = tempangle / bin_degree;
+
+			float k = tempangle - (a*bin_degree);
+
+			float r = k / bin_degree;
+
+			float tempmag = Mag.at<float>(i, j);
+
+			//			if (tempmag > 100)
+			//printf("Angle = %f, Magnitude = %f, BIN_HIST = %d\n", tempangle, tempmag, a);
+
+			bin_hist[a] += tempmag*(1 - r);
+
+			if ((a + 1) * 20 == 180){
+				bin_hist[0] += tempmag*r;
+			}
+			else{
+				bin_hist[a + 1] += tempmag*r;
+			}
+
+
+		}
+	}
+
+	
+	
+	float sum = 0;
+	
+	int max_bin = 0;
+	
+	float cur_max = 0;
+	
+	for (int z = 0; z < NumBins; z++){
+		
+	//	printf("NumBin[%d] (%d ~  %d) = %f\n", z, z*bin_degree, (z + 1)*bin_degree, bin_hist[z]);
+		if (bin_hist[z] >= cur_max){
+			max_bin = z;
+			cur_max = bin_hist[z];
+		}
+		
+		sum += bin_hist[z];
+
+	}
+
+	
+	if (sum <= 15000)
+		return false;
+
+	//printf("SUM = %f\n", sum);
+	
+
+	vector<float> bin_average(NumBins, 0);
+
+	for (int z = 0; z < NumBins; z++)		
+		bin_average[z] = bin_hist[z] / sum;
+
+	int temp_bin = max_bin;
+	
+	if (max_bin == 0)
+		temp_bin = 9;
+	
+	if (bin_average[max_bin] + MAX(bin_average[temp_bin - 1], bin_average[(max_bin + 1) % NumBins]) >= 0.8)
+		return false;
+	else
+		return true;
 
 }
