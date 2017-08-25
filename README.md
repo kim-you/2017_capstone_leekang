@@ -64,7 +64,8 @@ direct_area, nomalize, calcEdgeDirection3
 
 
 
-
+## 4. YOLO
+You can download weight file via this link https://drive.google.com/file/d/0BxrayYHrdwzRV1BacWZoWklDNkU/view?usp=sharing
   
 - - - - 
 
