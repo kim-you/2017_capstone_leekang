@@ -17,7 +17,7 @@ using namespace std;
 
 int edge_hist_num = 0;
 
-bool calcEdgeDirection3(Mat Origin, int NumBins);
+bool calcEdgeDirection3(Mat Origin, int NumBins, float _ratio = 0.8, int threshold=10000);
 
 Mat FindLargestArea(Mat origin, Mat cannies){
 	Mat src;
@@ -269,7 +269,7 @@ void callBackFunc2(int event, int x, int y, int flags, void* userdata){
 		rectangle(src, Point(x - 5, y - 5), Point(x + 5, y + 5), Scalar(0, 0, 255), 1, 8);
 
 		char str[200];
-		sprintf(str, "%d", counts_number);
+		sprintf_s(str, "%d", counts_number);
 		putText(src, str, Point(x - 7, y - 10), 1, 1, Scalar(0, 0, 255));
 
 		imshow("ORIGIN", src);
@@ -505,8 +505,25 @@ void detect_haarcascades(Mat src, string path="")
 		flag = 1;
 }
 
-Mat DistHisto(Mat Origin, Mat compare1, Mat compare2, Mat compare3, int SEG_SIZE){
+int DistHisto(Mat Origin, Mat compare1, Mat compare2, Mat compare3, int SEG_SIZE){
+	int temp_thres = 0;
 
+	Mat mask1 = imread("C:\\Users\\Administrator\\Desktop\\Study\\4학년\\공프기\\OpenCV\\TrafficExample\\Mask1.jpg");
+	Mat mask2 = imread("C:\\Users\\Administrator\\Desktop\\Study\\4학년\\공프기\\OpenCV\\TrafficExample\\Mask2.jpg");
+	Mat mask3 = imread("C:\\Users\\Administrator\\Desktop\\Study\\4학년\\공프기\\OpenCV\\TrafficExample\\Mask3.jpg");
+	
+	resize(mask1, mask1, Size(Origin.cols, Origin.rows));
+	resize(mask2, mask2, Size(Origin.cols, Origin.rows));
+	resize(mask3, mask3, Size(Origin.cols, Origin.rows));
+	mask1 = mask1 > 128;
+	mask2 = mask2 > 128;
+	mask3 = mask3 > 128;
+
+	
+
+
+	if (Origin.empty() || compare1.empty() || compare2.empty() || compare3.empty())
+		return -1;
 
 	Mat src_base, src_base1, hsv_base, hsv_base1;
 	Mat src_test1, hsv_test1;
@@ -516,17 +533,21 @@ Mat DistHisto(Mat Origin, Mat compare1, Mat compare2, Mat compare3, int SEG_SIZE
 	int match1 = 0;
 	int match2 = 0;
 
-
 	src_base = Origin.clone();
-	src_base1 = compare1.clone();
-	src_test1 = compare2.clone();
-	src_test2 = compare3.clone();
+	
+	compare1.copyTo(src_base1, mask1);
+	compare2.copyTo(src_test1, mask2);
+	compare3.copyTo(src_test2, mask3);
+
+	//src_base1 = compare1.clone();
+	//src_test1 = compare2.clone();
+	//src_test2 = compare3.clone();
 
 	cvtColor(src_base, hsv_base, CV_BGR2HSV);
 	cvtColor(src_base1, hsv_base1, CV_BGR2HSV);
 	cvtColor(src_test1, hsv_test1, CV_BGR2HSV);
 	cvtColor(src_test2, hsv_test2, CV_BGR2HSV);
-
+	
 	src_base.copyTo(src_line);
 
 	//Allocate Array Size
@@ -646,12 +667,18 @@ Mat DistHisto(Mat Origin, Mat compare1, Mat compare2, Mat compare3, int SEG_SIZE
 	for (int i = 0; i < Mat_col; i++){
 
 		for (int j = 0; j < Mat_row; j++){
+			
 			char str[200];
-		//	printf("Loop %d %d\n", i, j);
+
+			//	printf("Loop %d %d\n", i, j);
+
 			hsv_base = temporary[i][j].clone();
 			hsv_base1 = temporary4[i][j].clone();
 			hsv_test1 = temporary2[i][j].clone();
 			hsv_test2 = temporary3[i][j].clone();
+
+		
+
 
 
 			/// Calculate the histograms for the HSV images
@@ -672,40 +699,52 @@ Mat DistHisto(Mat Origin, Mat compare1, Mat compare2, Mat compare3, int SEG_SIZE
 			double base_test0 = compareHist(hist_base, hist_base1, 0);
 			double base_test1 = compareHist(hist_base, hist_test1, 0);
 			double base_test2 = compareHist(hist_base, hist_test2, 0);
-
-			if (base_test0 > 0.5 || base_test1 > 0.5 || base_test2 > 0.5){
-
-				if (base_test0 > 0.5)
-					match0++;
-				if (base_test1 > 0.5)
-					match1++;
-				if (base_test2 > 0.5)
-					match2++;
-
-			//	printf("Check!\n");
-			//	printf("Base-Test(0) Base-Test(1), Base-Test(2) : %f, %f, %f \n", base_test0, base_test1, base_test2);
-				//imshow("T1", temporary[i][j]);
-				//imshow("T2", temporary2[i][j]);
-				//imshow("T3", temporary3[i][j]);
-				//waitKey(0);
-
-				//				system("PAUSE");
+			
+			max_base = MAX(base_test0, MAX(base_test1, base_test2));
+			
+			
+			
+			if (max_base == base_test0 && max_base == base_test1 && max_base == base_test2){
+				putText(src_line, "X", Point(i*SEG_SIZE + SEG_SIZE / 2, j*SEG_SIZE + SEG_SIZE / 2), 1, 1, Scalar(255, 255, 255), 2, 4, false);
+				continue;
 			}
 
-			max_base = MAX(base_test0, MAX(base_test1, base_test2));
-		//	cout << "MAXIMUM : " << max_base << endl;
+			//if (base_test0 > temp_thres || base_test1 > temp_thres || base_test2 > temp_thres){
 
-			if (max_base == base_test0){
+			//	if (base_test0 > temp_thres)
+			//		match0++;
+			//	if (base_test1 > temp_thres)
+			//		match1++;
+			//	if (base_test2 > temp_thres)
+			//		match2++;
+
+			////	printf("Check!\n");
+			////	printf("Base-Test(0) Base-Test(1), Base-Test(2) : %f, %f, %f \n", base_test0, base_test1, base_test2);
+			//	//imshow("T1", temporary[i][j]);
+			//	//imshow("T2", temporary2[i][j]);
+			//	//imshow("T3", temporary3[i][j]);
+			//	//waitKey(0);
+
+			//	//				system("PAUSE");
+			//}
+
+			
+		//	cout << "MAXIMUM : " << max_base << endl;
+			
+			else if (max_base == base_test0){
 				putText(src_line, "1", Point(i*SEG_SIZE + SEG_SIZE / 2, j*SEG_SIZE + SEG_SIZE / 2), 1, 1, Scalar(0, 255, 0), 2, 4, false);
 				//putText(test_mask, "1", Point(i*SEG_SIZE + SEG_SIZE / 2, j*SEG_SIZE + SEG_SIZE / 2), 1, 1, Scalar(0, 255, 0), 2, 4, false);
+				match0++;
 			}
-			if (max_base == base_test1){
+			else if (max_base == base_test1){
 				putText(src_line, "2", Point(i*SEG_SIZE + SEG_SIZE / 2, j*SEG_SIZE + SEG_SIZE / 2), 1, 1, Scalar(255, 0, 0), 2, 4, false);
 				//	putText(test_mask, "2", Point(i*SEG_SIZE + SEG_SIZE / 2, j*SEG_SIZE + SEG_SIZE / 2), 1, 1, Scalar(255, 0, 0), 2, 4, false);
+				match1++;
 			}
-			if (max_base == base_test2){
+			else if (max_base == base_test2){
 				putText(src_line, "3", Point(i*SEG_SIZE + SEG_SIZE / 2, j*SEG_SIZE + SEG_SIZE / 2), 1, 1, Scalar(0, 0, 255), 2, 4, false);
 				//	putText(test_mask, "3", Point(i*SEG_SIZE + SEG_SIZE / 2, j*SEG_SIZE + SEG_SIZE / 2), 1, 1, Scalar(0, 0, 255), 2, 4, false);
+				match2++;
 			}
 
 
@@ -728,13 +767,13 @@ Mat DistHisto(Mat Origin, Mat compare1, Mat compare2, Mat compare3, int SEG_SIZE
 	int max_match = MAX(match0, MAX(match1, match2));
 
 	if (max_match == match0)
-		return compare1;
+		return 1;
 
 	if (max_match == match1)
-		return compare2;
+		return 2;
 
 	if (max_match == match2)
-		return compare3;
+		return 3;
 
 
 }
@@ -894,7 +933,7 @@ int* calcEdgeDirection2(Mat Origin, int NumBins){
 
 			bin_hist[a] += tempmag*(1 - r);
 
-			if ((a + 1) * 20 == 180){
+			if ((a + 1) * bin_degree >= 180){
 				bin_hist[0] += tempmag*r;
 			}
 			else{
@@ -1588,7 +1627,7 @@ void splitEdgeDirection(Mat Origin, int BIN_SIZE, int SEG_SIZE=0){
 				check_direct = calcEdgeDirection2(temporary[i][j], BIN_SIZE);
 
 				for (int z = 0; z < BIN_SIZE; z++){
-					sprintf(str, "%d", z);
+					sprintf_s(str, "%d", z);
 					float size = SEG_SIZE*0.3;
 					float size2 = SEG_SIZE*0.4;
 
@@ -1699,8 +1738,8 @@ void callBackFunc3(int event, int x, int y, int flags, void* userdata){
 
 		char str[200];
 		char str2[200];
-		sprintf(str, "%d", counts_number);
-		sprintf(str2, "%d", edge_hist_num);
+		sprintf_s(str, "%d", counts_number);
+		sprintf_s(str2, "%d", edge_hist_num);
 		
 		putText(src2, str, Point(x - SEG_SIZE/2, y - SEG_SIZE), 1, 1, Scalar(0, 0, 255));
 		putText(src2, str2, Point(x, y), 1, 1, Scalar(255, 255, 0));
@@ -1716,7 +1755,7 @@ void callBackFunc3(int event, int x, int y, int flags, void* userdata){
 
 }
 
-Mat direct_area(Mat src, int window_size, float sky_rate = 0) {
+Mat direct_area(Mat src, int window_size, float ratio, float sky_rate = 0) {
 	/*
 	Mat src :  원본 영상(에지처리후->2진화영상으로 변환된 영상이어야함.
 	float sky_rate : 하늘에 해당하는 비율 (ex/ 0.3 : 상위 30%를 무시한다)
@@ -1749,11 +1788,11 @@ Mat direct_area(Mat src, int window_size, float sky_rate = 0) {
 
 			window = src(Range(i, i2), Range(j, j2));
 			
-			if (calcEdgeDirection3(window, 9)){
+			if (calcEdgeDirection3(window, 18, ratio, 8000)){
 				output(Range(i, i2), Range(j, j2)) += Scalar(50, 50, 50);
 			}
 			else{
-				output(Range(i, i2), Range(j, j2)) = Scalar(0, 0, 0);
+				output(Range(i, i2), Range(j, j2)) -= Scalar(50, 50, 50);
 			}
 
 		}
@@ -1765,10 +1804,10 @@ Mat direct_area(Mat src, int window_size, float sky_rate = 0) {
 
 
 
-bool calcEdgeDirection3(Mat Origin, int NumBins){
+bool calcEdgeDirection3(Mat Origin, int NumBins, float _ratio, int threshold){
 
 	Mat src, gray, sobel_x, sobel_y, result, canny, mask_x, mask_y;
-
+	
 	src = Origin.clone();
 
 	//Dynamic allocation
@@ -1822,7 +1861,7 @@ bool calcEdgeDirection3(Mat Origin, int NumBins){
 
 			bin_hist[a] += tempmag*(1 - r);
 
-			if ((a + 1) * 20 == 180){
+			if ((a + 1) * bin_degree >= 180){
 				bin_hist[0] += tempmag*r;
 			}
 			else{
@@ -1854,7 +1893,7 @@ bool calcEdgeDirection3(Mat Origin, int NumBins){
 	}
 
 	
-	if (sum <= 15000)
+	if (sum <= threshold)
 		return false;
 
 	//printf("SUM = %f\n", sum);
@@ -1870,7 +1909,7 @@ bool calcEdgeDirection3(Mat Origin, int NumBins){
 	if (max_bin == 0)
 		temp_bin = 9;
 	
-	if (bin_average[max_bin] + MAX(bin_average[temp_bin - 1], bin_average[(max_bin + 1) % NumBins]) >= 0.8)
+	if (bin_average[max_bin] + MAX(bin_average[temp_bin - 1], bin_average[(max_bin + 1) % NumBins]) >= _ratio)
 		return false;
 	else
 		return true;
