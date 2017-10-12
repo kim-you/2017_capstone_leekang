@@ -35,14 +35,14 @@ int main()
 	Mat Mask3 = imread("C:\\Users\\Administrator\\Desktop\\Study\\4학년\\공프기\\OpenCV\\TrafficExample\\Mask3.jpg", CV_8UC1);
 
 
-	resize(src_base, src_base, Size(410, 290));
-	resize(src_base1, src_base1, Size(410, 290));
-	resize(src_test1, src_test1, Size(410, 290));
-	resize(src_test2, src_test2, Size(410, 290));
+	resize(src_base, src_base, Size(400, 300));
+	resize(src_base1, src_base1, Size(400, 300));
+	resize(src_test1, src_test1, Size(400, 300));
+	resize(src_test2, src_test2, Size(400, 300));
 
-	resize(Mask1, Mask1, Size(410, 290));
-	resize(Mask2, Mask2, Size(410, 290));
-	resize(Mask3, Mask3, Size(410, 290));
+	resize(Mask1, Mask1, Size(400, 300));
+	resize(Mask2, Mask2, Size(400, 300));
+	resize(Mask3, Mask3, Size(400, 300));
 
 	Mask1 = Mask1 > 128;
 	Mask2 = Mask2 > 128;
@@ -50,13 +50,12 @@ int main()
 
 	Mat test_mask;
 
-	Mat result = DistHisto(src_base, src_base1, src_test1, src_test2, 20);
+	DistHisto(src_base, src_base1, src_test1, src_test2, 20);
 
 	imshow("BASE", src_base);
 	imshow("A", src_base1);
 	imshow("B", src_test1);
 	imshow("C", src_test2);
-	imshow("RESULT", result);
 
 	printf("Done \n");
 	
