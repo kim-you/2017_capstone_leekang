@@ -45,7 +45,6 @@ direct_area, nomalize, calcEdgeDirection3
 #include "cv.hpp" //여기에 필요한 거 다 있음
 #include "opencv2/opencv.hpp" //이렇게만 하면 다 뜬다 다 뜬다
 
-using namespace std;
 using namespace cv;
 Point2f A, B;
 
@@ -77,7 +76,6 @@ Mat FindRoad(Mat src);
 
 int ifLRline(Point2f A, Point2f B, Point2f P);
 bool intersection(Point2f o1, Point2f p1, Point2f o2, Point2f p2, Point2f &r);
-
 void OpticalFlow_Count(int Pnum, vector<uchar> status, int & Car_num, Mat& frame, Point2f & pass, vector<Point2f> after, vector<Point2f> Center, Point2f A, Point2f B);
 
 //! Calc distance between two Points.

@@ -269,7 +269,7 @@ void callBackFunc2(int event, int x, int y, int flags, void* userdata){
 		rectangle(src, Point(x - 5, y - 5), Point(x + 5, y + 5), Scalar(0, 0, 255), 1, 8);
 
 		char str[200];
-		sprintf_s(str, "%d", counts_number);
+		sprintf(str, "%d", counts_number);
 		putText(src, str, Point(x - 7, y - 10), 1, 1, Scalar(0, 0, 255));
 
 		imshow("ORIGIN", src);
@@ -535,13 +535,13 @@ int DistHisto(Mat Origin, Mat compare1, Mat compare2, Mat compare3, int SEG_SIZE
 
 	src_base = Origin.clone();
 	
-	compare1.copyTo(src_base1, mask1);
-	compare2.copyTo(src_test1, mask2);
-	compare3.copyTo(src_test2, mask3);
+	//compare1.copyTo(src_base1, mask1);
+	//compare2.copyTo(src_test1, mask2);
+	//compare3.copyTo(src_test2, mask3);
 
-	//src_base1 = compare1.clone();
-	//src_test1 = compare2.clone();
-	//src_test2 = compare3.clone();
+	src_base1 = compare1.clone();
+	src_test1 = compare2.clone();
+	src_test2 = compare3.clone();
 
 	cvtColor(src_base, hsv_base, CV_BGR2HSV);
 	cvtColor(src_base1, hsv_base1, CV_BGR2HSV);
@@ -732,17 +732,17 @@ int DistHisto(Mat Origin, Mat compare1, Mat compare2, Mat compare3, int SEG_SIZE
 		//	cout << "MAXIMUM : " << max_base << endl;
 			
 			else if (max_base == base_test0){
-				putText(src_line, "1", Point(i*SEG_SIZE + SEG_SIZE / 2, j*SEG_SIZE + SEG_SIZE / 2), 1, 1, Scalar(0, 255, 0), 2, 4, false);
+				putText(src_line, "A", Point(i*SEG_SIZE + SEG_SIZE / 2, j*SEG_SIZE + SEG_SIZE / 2), 1, 1, Scalar(0, 255, 0), 2, 4, false);
 				//putText(test_mask, "1", Point(i*SEG_SIZE + SEG_SIZE / 2, j*SEG_SIZE + SEG_SIZE / 2), 1, 1, Scalar(0, 255, 0), 2, 4, false);
 				match0++;
 			}
 			else if (max_base == base_test1){
-				putText(src_line, "2", Point(i*SEG_SIZE + SEG_SIZE / 2, j*SEG_SIZE + SEG_SIZE / 2), 1, 1, Scalar(255, 0, 0), 2, 4, false);
+				putText(src_line, "B", Point(i*SEG_SIZE + SEG_SIZE / 2, j*SEG_SIZE + SEG_SIZE / 2), 1, 1, Scalar(255, 0, 0), 2, 4, false);
 				//	putText(test_mask, "2", Point(i*SEG_SIZE + SEG_SIZE / 2, j*SEG_SIZE + SEG_SIZE / 2), 1, 1, Scalar(255, 0, 0), 2, 4, false);
 				match1++;
 			}
 			else if (max_base == base_test2){
-				putText(src_line, "3", Point(i*SEG_SIZE + SEG_SIZE / 2, j*SEG_SIZE + SEG_SIZE / 2), 1, 1, Scalar(0, 0, 255), 2, 4, false);
+				putText(src_line, "C", Point(i*SEG_SIZE + SEG_SIZE / 2, j*SEG_SIZE + SEG_SIZE / 2), 1, 1, Scalar(0, 0, 255), 2, 4, false);
 				//	putText(test_mask, "3", Point(i*SEG_SIZE + SEG_SIZE / 2, j*SEG_SIZE + SEG_SIZE / 2), 1, 1, Scalar(0, 0, 255), 2, 4, false);
 				match2++;
 			}
@@ -1627,7 +1627,7 @@ void splitEdgeDirection(Mat Origin, int BIN_SIZE, int SEG_SIZE=0){
 				check_direct = calcEdgeDirection2(temporary[i][j], BIN_SIZE);
 
 				for (int z = 0; z < BIN_SIZE; z++){
-					sprintf_s(str, "%d", z);
+					sprintf(str, "%d", z);
 					float size = SEG_SIZE*0.3;
 					float size2 = SEG_SIZE*0.4;
 
@@ -1738,8 +1738,8 @@ void callBackFunc3(int event, int x, int y, int flags, void* userdata){
 
 		char str[200];
 		char str2[200];
-		sprintf_s(str, "%d", counts_number);
-		sprintf_s(str2, "%d", edge_hist_num);
+		sprintf(str, "%d", counts_number);
+		sprintf(str2, "%d", edge_hist_num);
 		
 		putText(src2, str, Point(x - SEG_SIZE/2, y - SEG_SIZE), 1, 1, Scalar(0, 0, 255));
 		putText(src2, str2, Point(x, y), 1, 1, Scalar(255, 255, 0));
