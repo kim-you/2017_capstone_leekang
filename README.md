@@ -59,18 +59,24 @@ direct_area, nomalize, calcEdgeDirection3
 ### Find back-ground image, and check where is the road.
 ![Original](Image/Original.jpg) ![Background](Image/Background.jpg) ![Road](Image/Road_mask.jpg)   
 
-## 3. Detect the car
+## 3. Detect the car with YOLO
+### Detect cars using YOLO algorithm.
+![YOLO](Image/Detecting_Car.JPG)   
+###### You can download weight file via this link https://drive.google.com/file/d/0BxrayYHrdwzRV1BacWZoWklDNkU/view?usp=sharing
 
+### 4. ETC
+#### a) Rotate sensing and distribute comparison.
+![ROTATE](Image/Original_Rotating.JPG)    
+![Sobel](Image/Sobel_Y.JPG)  
+![Sobel_R](Image/Sobel_Rotating.JPG)  
+###### If CCTV rotates, then Sobel_Y's edge rapidly decreases.   
 
+#### b) Image Comparison for Sensing Rotation, using Distribute Image Comparison.
+![DIS](Image/Dist_Histo_result.JPG)
 
+#### c) Draw imaginary map, using optical flow
+![Map](Image/Imaginary_Map.JPG)   
 
-## 4. YOLO
-You can download weight file via this link https://drive.google.com/file/d/0BxrayYHrdwzRV1BacWZoWklDNkU/view?usp=sharing
-  
 - - - - 
 
- 
-_Handong Global University. Capstone project with Prof.Yi  
-
-Kim you, Lee hansung, Lee taewoo.
-_
+_Handong Global University. Capstone project with Prof.Yi, Kim you, Lee hansung, Lee taewoo._
