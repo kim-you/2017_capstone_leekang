@@ -1,6 +1,6 @@
 #include "cv.hpp" //Header
 #include "opencv2/opencv.hpp" //Header include all
-#include "RoadDetection.h"
+#include "../Header/RoadDetection.h"
 #include <deque>
 
 using namespace std;
@@ -17,14 +17,14 @@ int number = 0;
 
 
 int main(){
-	
+
 	bool turn_flag = true;
 
 	int queue_sum = 0;
 	float average_w = 0;
 
 	deque<int> average_queue;
-		
+
 	int* min = new int(3);
 
 	min[0] = 1000000;
@@ -37,9 +37,9 @@ int main(){
 
 	int camera_flag = 0;
 
-	VideoCapture capture("C:\\Users\\Administrator\\Desktop\\Study\\4학년\\공프기\\OpenCV\\TrafficExample\\traffic16.avi");
+	VideoCapture capture("../TrafficExample/MovingCamera.mp4");
 	//VideoCapture capture(0);
-	
+
 	Mat src, gray, edge, back, diff, back2, bob, bob2;
 	Mat fortesting;
 	Mat back_gray;
@@ -98,51 +98,51 @@ int main(){
 		back2 = back2 > 128;
 
 		//printf("%d\n", countNonZero(edge));
-		
+
 		//cout << countNonZero(back2) << endl;
 
-		/////////////////////////*Queue Part, last element * 1/5 *///////////////////////	
+		/////////////////////////*Queue Part, last element * 1/5 *///////////////////////
 		average_queue.push_back(countNonZero(back2));
 
 		if (average_queue.size() == QUEUE_SIZE){
-			
+
 			average_w = 0;
 			queue_sum = 0;
 
-			for (int i = 0; i < QUEUE_SIZE; i++){			
-				
+			for (int i = 0; i < QUEUE_SIZE; i++){
+
 				if (i == QUEUE_SIZE - 1){
 					queue_sum += average_queue.at(i)*AV_WEIGHT;
 				}
 				else{
 					queue_sum += average_queue.at(i);
 				}
-				
+
 	//			printf("QUEUE[%d] = %d\n", i, average_queue.at(i));
-				
+
 				average_w = queue_sum / ((QUEUE_SIZE) - (1-AV_WEIGHT));
-				
+
 			}
 
 //			printf("QUEUE_AVERAGE = %f\n", average_w);
 
 			average_queue.pop_front();
-		}				 
+		}
 		///////////////////////////////////////////////////////////////////////////////////////
-		
-		
+
+
 
 
 
 		//printf("COUNT_NONZERO_BEFORE = %d\n", countNonZero(edge));
-		
+
 		if ((average_w*0.5 > countNonZero(edge)) && camera_flag == 0) {
 			flag = 1;
 
 			number++;
 			number = number % ROTATION;
 			printf("===============ROTATION %d====================\n", number+1);
-			
+
 			camera_flag = 1;
 		}
 
@@ -153,22 +153,22 @@ int main(){
 		}
 
 		if (camera_flag == 2 && (average_w * 1.5) > countNonZero(edge)){
-			
+
 			printf("=======================SECOND END ROTATION %d===================\n", number + 1);
-			
+
 			camera_flag = 0;
-			
+
 			int temp = DistHisto(src, comparison[0], comparison[1], comparison[2], 15);
-			
-			cout << "BEST MATCH NUMBER = " << temp << endl;			
+
+			cout << "BEST MATCH NUMBER = " << temp << endl;
 			cout << "CURRENT NUMBER = " << number+1 << endl;
-			
+
 			if (temp == -1){
 				printf("=========================INSTALLING===========================\n");
 				comparison[number] = src.clone();
 			}
 			else if (temp != number+1){
-				
+
 				printf("===========================FALSE===========================\n");
 				printf("===========================FALSE===========================\n");
 				printf("===========================FALSE===========================\n");
@@ -178,14 +178,14 @@ int main(){
 				printf("===========================FALSE===========================\n");
 				printf("===========================FALSE===========================\n");
 				printf("===========================FALSE===========================\n");
-				
+
 				turn_flag = false;
 
 			}
 			else{
 				comparison[number] = src.clone();
 			}
-				
+
 		}
 
 		if (camera_flag==0 && turn_flag==true){
@@ -200,7 +200,7 @@ int main(){
 			Canny(back_gray, back_gray, 50, 100);
 
 			if (countNonZero(back_gray) < min[number]){
-				//cout << "[" << number << "]" << "Updated: " << countNonZero(back_gray) << endl;		
+				//cout << "[" << number << "]" << "Updated: " << countNonZero(back_gray) << endl;
 				min[number] = countNonZero(back_gray);
 				min_back[number] = background[number].clone();
 				//road_area[number] = FindRoad(min_back[number]);
@@ -208,7 +208,7 @@ int main(){
 
 
 		}
-		
+
 		char str[200];
 		sprintf_s(str, "%d", number + 1);
 		putText(src, str, Point(10, 10), 1, 1, Scalar(0, 0, 255));
@@ -219,8 +219,8 @@ int main(){
 		imshow("RESULT", src);
 		//imshow("EDGE", edge);
 
-		imshow("VECTORTEST1", frames[0]); 
-		imshow("VECTORTEST2", frames[1]); 
+		imshow("VECTORTEST1", frames[0]);
+		imshow("VECTORTEST2", frames[1]);
 		imshow("VECTORTEST3", frames[2]);
 
 		//if (!comparison[0].empty())
@@ -235,7 +235,7 @@ int main(){
 		imshow("Fore2", foreground[1]);
 		imshow("Fore3", foreground[2]);
 */
-		
+
 		imshow("Back1", background[0]);
 		imshow("Back2", background[1]);
 		imshow("Back3", background[2]);
@@ -263,10 +263,10 @@ int main(){
 		}
 
 		back = src.clone();
-	
+
 }
 	delete[] vc;
-	
+
 	return 0;
 
 }
