@@ -91,9 +91,9 @@ vector<float> nomalize(vector<float> a) {
 
 Mat nonedge_area(Mat src, float sky_rate, int window_size) {
 	/*
-	Mat src :  ¿øº» ¿µ»ó(¿¡ÁöÃ³¸®ÈÄ->2ÁøÈ­¿µ»óÀ¸·Î º¯È¯µÈ ¿µ»óÀÌ¾î¾ßÇÔ.
-	float sky_rate : ÇÏ´Ã¿¡ ÇØ´çÇÏ´Â ºñÀ² (ex/ 0.3 : »óÀ§ 30%¸¦ ¹«½ÃÇÑ´Ù)
-	int window_size : À©µµ¿ìÀÇ Å©±â : ³·À»¼ö·Ï Á¤¹ÐÇÏ°Ô °Ë»ö.
+	Mat src :  ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½(ï¿½ï¿½ï¿½ï¿½Ã³ï¿½ï¿½ï¿½ï¿½->2ï¿½ï¿½È­ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½È¯ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ì¾ï¿½ï¿½ï¿½ï¿½ï¿½.
+	float sky_rate : ï¿½Ï´Ã¿ï¿½ ï¿½Ø´ï¿½ï¿½Ï´ï¿½ ï¿½ï¿½ï¿½ï¿½ (ex/ 0.3 : ï¿½ï¿½ï¿½ï¿½ 30%ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ñ´ï¿½)
+	int window_size : ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Å©ï¿½ï¿½ : ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï°ï¿½ ï¿½Ë»ï¿½.
 	*/
 
 	int i, i2 = 0;
@@ -287,9 +287,9 @@ Mat FindRoad(Mat src){
 	Mat box, box3, lab_back, filter, box4, Color_Mask;
 
 	//back = src.clone();
-	
+
 	bilateralFilter(src, back, 30, 60, 10);
-	
+
 	cvtColor(back, gray, CV_RGB2GRAY);
 	//GaussianBlur(gray, gray, Size(7, 7), 0, 0);
 	Canny(gray, canny, 15, 25, 3);
@@ -297,7 +297,7 @@ Mat FindRoad(Mat src){
 	box = nonedge_area(canny, 0.3, 10);
 	//imshow("BOX", box);
 	box3 = FindLargestArea(src, box); // this is the mask
-	
+
 	//Input Lab Matrix && Largest Area's Mask.
 
 	cvtColor(back, lab_back, CV_BGR2Lab);
@@ -367,7 +367,7 @@ void OpticalFlow_Count(int Pnum, vector<uchar> status, int & Car_num, Mat& frame
 							pass = Point(0, 0);	 // only once
 							continue;
 						}
-						pass = P;	//save the point which is on the line 
+						pass = P;	//save the point which is on the line
 						Car_num++;
 						line(frame, A, B, Scalar(0, 255, 255), 10, 10, 0);
 					}
@@ -397,24 +397,24 @@ void detect_haarcascades(Mat src, string path="")
 
 
 	//frame size
-	
+
 
 	__int64 freq, start, finish;
 	::QueryPerformanceFrequency((_LARGE_INTEGER*)&freq);
 
 	uchar *temp_ptr;
 	uchar *temp_ptr2;
-	
+
 
 	/* code block 1 */
 	//4000 Negative Test
-	//string cascadeName = "C:\\Users\\Administrator\\Desktop\\Study\\4ÇÐ³â\\°øÇÁ±â\\OpenCV\\MachineLearning\\cascade_Test\\cascade.xml";
+	//string cascadeName = "C:\\Users\\Administrator\\Desktop\\Study\\4ï¿½Ð³ï¿½\\ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½\\OpenCV\\MachineLearning\\cascade_Test\\cascade.xml";
 	//LBP
-	string cascadeName = "C:\\Users\\Administrator\\Desktop\\Study\\4ÇÐ³â\\°øÇÁ±â\\OpenCV\\MachineLearning\\cascade2\\cascade.xml";
+	string cascadeName = "C:\\Users\\Administrator\\Desktop\\Study\\4ï¿½Ð³ï¿½\\ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½\\OpenCV\\MachineLearning\\cascade2\\cascade.xml";
 	//HOG
-	//string cascadeName = "C:\\Users\\Administrator\\Desktop\\Study\\4ÇÐ³â\\°øÇÁ±â\\OpenCV\\MachineLearning\\cascade_Haar\\cascade.xml";
+	//string cascadeName = "C:\\Users\\Administrator\\Desktop\\Study\\4ï¿½Ð³ï¿½\\ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½\\OpenCV\\MachineLearning\\cascade_Haar\\cascade.xml";
 	//SVM
-	//string cascadeName = "C:\\Users\\Administrator\\Desktop\\Study\\4ÇÐ³â\\°øÇÁ±â\\OpenCV\\MachineLearning\\trainedSVM.xml";
+	//string cascadeName = "C:\\Users\\Administrator\\Desktop\\Study\\4ï¿½Ð³ï¿½\\ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½\\OpenCV\\MachineLearning\\trainedSVM.xml";
 
 
 
@@ -448,7 +448,7 @@ void detect_haarcascades(Mat src, string path="")
 	Size max_obj_sz_step(180, 180);
 
 
-	
+
 		frame = src.clone();
 		// input image
 		if (frame.empty()) return;
@@ -500,7 +500,7 @@ void detect_haarcascades(Mat src, string path="")
 		//	while ((ch = waitKey(10)) != 32 && ch != 27);
 		//	if (ch == 27) break;
 		//}
-	
+
 
 		flag = 1;
 }
@@ -508,10 +508,10 @@ void detect_haarcascades(Mat src, string path="")
 int DistHisto(Mat Origin, Mat compare1, Mat compare2, Mat compare3, int SEG_SIZE){
 	int temp_thres = 0;
 
-	Mat mask1 = imread("C:\\Users\\Administrator\\Desktop\\Study\\4ÇÐ³â\\°øÇÁ±â\\OpenCV\\TrafficExample\\Mask1.jpg");
-	Mat mask2 = imread("C:\\Users\\Administrator\\Desktop\\Study\\4ÇÐ³â\\°øÇÁ±â\\OpenCV\\TrafficExample\\Mask2.jpg");
-	Mat mask3 = imread("C:\\Users\\Administrator\\Desktop\\Study\\4ÇÐ³â\\°øÇÁ±â\\OpenCV\\TrafficExample\\Mask3.jpg");
-	
+	Mat mask1 = imread("C:\\Users\\Administrator\\Desktop\\Study\\4ï¿½Ð³ï¿½\\ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½\\OpenCV\\TrafficExample\\Mask1.jpg");
+	Mat mask2 = imread("C:\\Users\\Administrator\\Desktop\\Study\\4ï¿½Ð³ï¿½\\ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½\\OpenCV\\TrafficExample\\Mask2.jpg");
+	Mat mask3 = imread("C:\\Users\\Administrator\\Desktop\\Study\\4ï¿½Ð³ï¿½\\ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½\\OpenCV\\TrafficExample\\Mask3.jpg");
+
 	resize(mask1, mask1, Size(Origin.cols, Origin.rows));
 	resize(mask2, mask2, Size(Origin.cols, Origin.rows));
 	resize(mask3, mask3, Size(Origin.cols, Origin.rows));
@@ -519,11 +519,13 @@ int DistHisto(Mat Origin, Mat compare1, Mat compare2, Mat compare3, int SEG_SIZE
 	mask2 = mask2 > 128;
 	mask3 = mask3 > 128;
 
-	
 
 
-	if (Origin.empty() || compare1.empty() || compare2.empty() || compare3.empty())
+
+	if (Origin.empty() || compare1.empty() || compare2.empty() || compare3.empty()){
+		cout << "DIST HISTO ERROR | NO FILES" << endl;
 		return -1;
+	}
 
 	Mat src_base, src_base1, hsv_base, hsv_base1;
 	Mat src_test1, hsv_test1;
@@ -534,7 +536,7 @@ int DistHisto(Mat Origin, Mat compare1, Mat compare2, Mat compare3, int SEG_SIZE
 	int match2 = 0;
 
 	src_base = Origin.clone();
-	
+
 	compare1.copyTo(src_base1, mask1);
 	compare2.copyTo(src_test1, mask2);
 	compare3.copyTo(src_test2, mask3);
@@ -547,7 +549,7 @@ int DistHisto(Mat Origin, Mat compare1, Mat compare2, Mat compare3, int SEG_SIZE
 	cvtColor(src_base1, hsv_base1, CV_BGR2HSV);
 	cvtColor(src_test1, hsv_test1, CV_BGR2HSV);
 	cvtColor(src_test2, hsv_test2, CV_BGR2HSV);
-	
+
 	src_base.copyTo(src_line);
 
 	//Allocate Array Size
@@ -667,7 +669,7 @@ int DistHisto(Mat Origin, Mat compare1, Mat compare2, Mat compare3, int SEG_SIZE
 	for (int i = 0; i < Mat_col; i++){
 
 		for (int j = 0; j < Mat_row; j++){
-			
+
 			char str[200];
 
 			//	printf("Loop %d %d\n", i, j);
@@ -677,7 +679,7 @@ int DistHisto(Mat Origin, Mat compare1, Mat compare2, Mat compare3, int SEG_SIZE
 			hsv_test1 = temporary2[i][j].clone();
 			hsv_test2 = temporary3[i][j].clone();
 
-		
+
 
 
 
@@ -699,11 +701,11 @@ int DistHisto(Mat Origin, Mat compare1, Mat compare2, Mat compare3, int SEG_SIZE
 			double base_test0 = compareHist(hist_base, hist_base1, 0);
 			double base_test1 = compareHist(hist_base, hist_test1, 0);
 			double base_test2 = compareHist(hist_base, hist_test2, 0);
-			
+
 			max_base = MAX(base_test0, MAX(base_test1, base_test2));
-			
-			
-			
+
+
+
 			if (max_base == base_test0 && max_base == base_test1 && max_base == base_test2){
 				putText(src_line, "X", Point(i*SEG_SIZE + SEG_SIZE / 2, j*SEG_SIZE + SEG_SIZE / 2), 1, 1, Scalar(255, 255, 255), 2, 4, false);
 				continue;
@@ -728,9 +730,9 @@ int DistHisto(Mat Origin, Mat compare1, Mat compare2, Mat compare3, int SEG_SIZE
 			//	//				system("PAUSE");
 			//}
 
-			
+
 		//	cout << "MAXIMUM : " << max_base << endl;
-			
+
 			else if (max_base == base_test0){
 				putText(src_line, "1", Point(i*SEG_SIZE + SEG_SIZE / 2, j*SEG_SIZE + SEG_SIZE / 2), 1, 1, Scalar(0, 255, 0), 2, 4, false);
 				//putText(test_mask, "1", Point(i*SEG_SIZE + SEG_SIZE / 2, j*SEG_SIZE + SEG_SIZE / 2), 1, 1, Scalar(0, 255, 0), 2, 4, false);
@@ -808,7 +810,7 @@ int* calcEdgeDirection(Mat Origin, int NumBins){
 	cartToPolar(sobel_y, sobel_x, Mag, Angle, true);
 
 	addWeighted(sobel_x, 0.5, sobel_y, 0.5, 0, result);
-	
+
 	//imshow("RESULT", result);
 
 	for (int i = 0; i < Angle.rows; i++){
@@ -838,12 +840,12 @@ int* calcEdgeDirection(Mat Origin, int NumBins){
 
 	sort(temporary.begin(), temporary.end(), greater<>());
 
-	int temp_flag = 0;	
+	int temp_flag = 0;
 	int maximum = 0;
 	int maximum2 = 0;
 
 	for (int z = 0; z < NumBins; z++){
-		
+
 	//	printf("NumBin[%d] (%d ~  %d) = %d\n", z, z*bin_degree, (z + 1)*bin_degree, bin_hist[z]);
 
 		if (bin_hist[z] == temporary[0] && temp_flag==0){
@@ -853,7 +855,7 @@ int* calcEdgeDirection(Mat Origin, int NumBins){
 		else if (bin_hist[z] == temporary[1]){
 			maximum2 = z;
 		}
-	
+
 	}
 
 //	printf("MAXIMUM = %d, 2_MAXIMUM = %d\n", maximum, maximum2);
@@ -904,7 +906,7 @@ int* calcEdgeDirection2(Mat Origin, int NumBins){
 	//
 	//imshow("MASK_X", mask_x + mask_y);
 
-	
+
 	cartToPolar(sobel_y, sobel_x, Mag, Angle, true);
 
 
@@ -954,7 +956,7 @@ int* calcEdgeDirection2(Mat Origin, int NumBins){
 	int temp_flag = 0;
 	int maximum = 0;
 	int maximum2 = 0;
-	
+
 	float sum = 0;
 
 	vector<float> Normalized(NumBins);
@@ -964,7 +966,7 @@ int* calcEdgeDirection2(Mat Origin, int NumBins){
 		printf("NumBin[%d] (%d ~  %d) = %f\n", z, z*bin_degree, (z + 1)*bin_degree, bin_hist[z]);
 
 		sum += bin_hist[z];
-		
+
 		Normalized = nomalize(bin_hist);
 
 		if (bin_hist[z] == temporary[0] && temp_flag == 0){
@@ -977,11 +979,11 @@ int* calcEdgeDirection2(Mat Origin, int NumBins){
 
 	}
 
-	
+
 	for (int i = 0; i < NumBins; i++){
 		printf("Normal[%d] = %lf\n", i, Normalized[i]);
 	}
-	
+
 	int* t = new int[2];
 
 	t[0] = maximum;
@@ -1012,7 +1014,7 @@ Mat DistEdgeCompare(Mat Origin, Mat compare1, Mat compare2, Mat compare3, int SE
 	Mat src_base, src_base1;
 	Mat src_test1;
 	Mat src_test2;
-	
+
 	int match0 = 0;
 	int match1 = 0;
 	int match2 = 0;
@@ -1121,10 +1123,10 @@ Mat DistEdgeCompare(Mat Origin, Mat compare1, Mat compare2, Mat compare3, int SE
 		//line(test_mask, Point(0, j), Point(src_base.cols, j), Scalar(0, 255, 255), 1, 4);
 	}
 
-	for (int i = 0; i < Mat_col; i++){	
-	
+	for (int i = 0; i < Mat_col; i++){
+
 		for (int j = 0; j < Mat_row; j++){
-			
+
 			char str[200];
 		//	printf("Loop %d %d\n", i, j);
 			ED_src = calcEdgeDirection(temporary[i][j], 9);
@@ -1135,7 +1137,7 @@ Mat DistEdgeCompare(Mat Origin, Mat compare1, Mat compare2, Mat compare3, int SE
 			for (int z = 0; z < 2; z++){
 		//		printf("CHECK[%d] %d %d %d %d\n", z, ED_src[z], ED_src2[z], ED_src3[z], ED_src4[z]);
 			}
-	
+
 			if (ED_src[0] == ED_src2[0])
 				match0++;
 			if (ED_src[0] == ED_src3[0])
@@ -1148,10 +1150,10 @@ Mat DistEdgeCompare(Mat Origin, Mat compare1, Mat compare2, Mat compare3, int SE
 				match1_1++;
 			if (ED_src[1] == ED_src4[1])
 				match2_1++;
-		
+
 
 			if (match0 == match1 || match1 == match2 || match0 == match2){
-				
+
 				if (ED_src[1] == ED_src2[1] && ED_src[0] == ED_src2[0]){
 					putText(src_line, "1", Point(i*SEG_SIZE + SEG_SIZE / 2, j*SEG_SIZE + SEG_SIZE / 2), 1, 1, Scalar(0, 255, 0), 2, 4, false);
 					//printf("1 is the best match\n");
@@ -1195,7 +1197,7 @@ Mat DistEdgeCompare(Mat Origin, Mat compare1, Mat compare2, Mat compare3, int SE
 						test4++;
 					}
 				}
-			
+
 			}
 			else{
 				if (ED_src[0] == ED_src2[0]){
@@ -1234,7 +1236,7 @@ Mat DistEdgeCompare(Mat Origin, Mat compare1, Mat compare2, Mat compare3, int SE
 		}
 
 	}
-	
+
 	imshow("EDGELine", src_line);
 
 	printf("=================Edge Portion===================\n");
@@ -1547,15 +1549,15 @@ void splitEdgeDirection(Mat Origin, int BIN_SIZE, int SEG_SIZE=0){
 		Mat src_line = Origin.clone();
 
 		int* check_direct;
-		
+
 		check_direct = calcEdgeDirection2(Origin, BIN_SIZE);
-		
+
 		edge_hist_num = check_direct[0];
-		
+
 		printf("==========================================\n");
 		//imshow("SPLIT_SRC", src);
 		imshow("SSPLIT_LINE", src_line);
-		
+
 	}
 	else{
 
@@ -1707,10 +1709,10 @@ void splitEdgeDirection(Mat Origin, int BIN_SIZE, int SEG_SIZE=0){
 
 
 void callBackFunc3(int event, int x, int y, int flags, void* userdata){
-	
+
 	static int counts_number = 1;
-	int SEG_SIZE = 15; //¿©±â Å©±â ¸ÂÃç¾ßµÊ.
-	
+	int SEG_SIZE = 15; //ï¿½ï¿½ï¿½ï¿½ Å©ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ßµï¿½.
+
 	/* When Mouse Click, Get Scalar Values on Clicked Point */
 
 	Mat src = *(Mat*)userdata;
@@ -1731,16 +1733,16 @@ void callBackFunc3(int event, int x, int y, int flags, void* userdata){
 
 		printf("[%d]\n", counts_number);
 		src_slice = src(Range(y-SEG_SIZE/2, y + SEG_SIZE/2), Range(x-SEG_SIZE/2, x + SEG_SIZE/2));
-		
+
 		splitEdgeDirection(src_slice, 9);
-		
+
 		rectangle(src2, Point(x - SEG_SIZE/2, y - SEG_SIZE/2), Point(x + SEG_SIZE/2, y + SEG_SIZE/2), Scalar(0, 0, 255), 1, 8);
 
 		char str[200];
 		char str2[200];
 		sprintf_s(str, "%d", counts_number);
 		sprintf_s(str2, "%d", edge_hist_num);
-		
+
 		putText(src2, str, Point(x - SEG_SIZE/2, y - SEG_SIZE), 1, 1, Scalar(0, 0, 255));
 		putText(src2, str2, Point(x, y), 1, 1, Scalar(255, 255, 0));
 
@@ -1750,16 +1752,16 @@ void callBackFunc3(int event, int x, int y, int flags, void* userdata){
 
 		break;
 	}
-	
+
 	edge_hist_num = 0;
 
 }
 
 Mat direct_area(Mat src, int window_size, float ratio, float sky_rate = 0) {
 	/*
-	Mat src :  ¿øº» ¿µ»ó(¿¡ÁöÃ³¸®ÈÄ->2ÁøÈ­¿µ»óÀ¸·Î º¯È¯µÈ ¿µ»óÀÌ¾î¾ßÇÔ.
-	float sky_rate : ÇÏ´Ã¿¡ ÇØ´çÇÏ´Â ºñÀ² (ex/ 0.3 : »óÀ§ 30%¸¦ ¹«½ÃÇÑ´Ù)
-	int window_size : À©µµ¿ìÀÇ Å©±â : ³·À»¼ö·Ï Á¤¹ÐÇÏ°Ô °Ë»ö.
+	Mat src :  ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½(ï¿½ï¿½ï¿½ï¿½Ã³ï¿½ï¿½ï¿½ï¿½->2ï¿½ï¿½È­ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½È¯ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ì¾ï¿½ï¿½ï¿½ï¿½ï¿½.
+	float sky_rate : ï¿½Ï´Ã¿ï¿½ ï¿½Ø´ï¿½ï¿½Ï´ï¿½ ï¿½ï¿½ï¿½ï¿½ (ex/ 0.3 : ï¿½ï¿½ï¿½ï¿½ 30%ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ñ´ï¿½)
+	int window_size : ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Å©ï¿½ï¿½ : ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï°ï¿½ ï¿½Ë»ï¿½.
 	*/
 
 	int i, i2 = 0;
@@ -1787,7 +1789,7 @@ Mat direct_area(Mat src, int window_size, float ratio, float sky_rate = 0) {
 				j2 = j + window_size;
 
 			window = src(Range(i, i2), Range(j, j2));
-			
+
 			if (calcEdgeDirection3(window, 18, ratio, 8000)){
 				output(Range(i, i2), Range(j, j2)) += Scalar(50, 50, 50);
 			}
@@ -1807,7 +1809,7 @@ Mat direct_area(Mat src, int window_size, float ratio, float sky_rate = 0) {
 bool calcEdgeDirection3(Mat Origin, int NumBins, float _ratio, int threshold){
 
 	Mat src, gray, sobel_x, sobel_y, result, canny, mask_x, mask_y;
-	
+
 	src = Origin.clone();
 
 	//Dynamic allocation
@@ -1872,43 +1874,43 @@ bool calcEdgeDirection3(Mat Origin, int NumBins, float _ratio, int threshold){
 		}
 	}
 
-	
-	
+
+
 	float sum = 0;
-	
+
 	int max_bin = 0;
-	
+
 	float cur_max = 0;
-	
+
 	for (int z = 0; z < NumBins; z++){
-		
+
 	//	printf("NumBin[%d] (%d ~  %d) = %f\n", z, z*bin_degree, (z + 1)*bin_degree, bin_hist[z]);
 		if (bin_hist[z] >= cur_max){
 			max_bin = z;
 			cur_max = bin_hist[z];
 		}
-		
+
 		sum += bin_hist[z];
 
 	}
 
-	
+
 	if (sum <= threshold)
 		return false;
 
 	//printf("SUM = %f\n", sum);
-	
+
 
 	vector<float> bin_average(NumBins, 0);
 
-	for (int z = 0; z < NumBins; z++)		
+	for (int z = 0; z < NumBins; z++)
 		bin_average[z] = bin_hist[z] / sum;
 
 	int temp_bin = max_bin;
-	
+
 	if (max_bin == 0)
 		temp_bin = 9;
-	
+
 	if (bin_average[max_bin] + MAX(bin_average[temp_bin - 1], bin_average[(max_bin + 1) % NumBins]) >= _ratio)
 		return false;
 	else
