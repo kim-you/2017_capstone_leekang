@@ -1,6 +1,6 @@
 #include "cv.hpp" //Header
 #include "opencv2/opencv.hpp" //Header include all
-#include "RoadDetection.h"
+#include "../Header/RoadDetection_v3.h"
 #include <deque>
 
 using namespace std;
@@ -25,7 +25,7 @@ int main(){
 	Size _resize(600, 400);
 
 
-	Mat src = imread("C:\\Users\\Administrator\\Desktop\\Study\\4학년\\공프기\\OpenCV\\TrafficExample\\Image3.jpg");
+	Mat src = imread("../TrafficExample/Image3.jpg");
 
 	resize(src, src, _resize);
 
@@ -39,7 +39,7 @@ int main(){
 
 	imshow("ORIGIN", src);
 	setMouseCallback("ORIGIN", callBackFunc2, &src); //Get Mouse Event For knowing Scalar Value.
-	
+
 	vector<Point> rect;
 	rect.push_back(TopLeft);
 	rect.push_back(TopRight);
@@ -57,13 +57,13 @@ int main(){
 	Point2f source[4], out[4];
 	source[0] = Point2f(TopLeft.x, TopLeft.y);
 	source[1] = Point2f(TopRight.x, TopRight.y);
-	source[0] = Point2f(BottomLeft.x, BottomLeft.y);
-	source[0] = Point2f(BottomRight.x, BottomRight.y);
+	source[2] = Point2f(BottomRight.x, BottomRight.y);
+	source[3] = Point2f(BottomLeft.x, BottomLeft.y);
 
 	out[0] = Point2f(0, 0);
-	out[1] = Point2f(maxWidth - 1, 0);
-	out[2] = Point2f(maxWidth - 1, maxLength - 1);
-	out[3] = Point2f(0, maxLength - 1);
+	out[1] = Point2f(maxWidth, 0);
+	out[2] = Point2f(maxWidth, maxLength);
+	out[3] = Point2f(0, maxLength);
 
 	Mat test = getPerspectiveTransform(source, out);
 	Mat output;
@@ -117,7 +117,7 @@ void callBackFunc2(int event, int x, int y, int flags, void* userdata){
 		rectangle(src, Point(x - 5, y - 5), Point(x + 5, y + 5), Scalar(0, 0, 255), 1, 8);
 
 		char str[200];
-		sprintf_s(str, "%d", counts_number);
+		sprintf(str, "%d", counts_number);
 		putText(src, str, Point(x - 7, y - 10), 1, 1, Scalar(0, 0, 255));
 
 		imshow("ORIGIN", src);
