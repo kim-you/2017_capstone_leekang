@@ -12,10 +12,10 @@ using namespace cv;
 #define AV_WEIGHT float(0.2)
 #define DIST_SIZE 20
 
-Point TopLeft(235,170);
-Point TopRight(369,170);
-Point BottomLeft(24,322);
-Point BottomRight(589,342);
+Point TopLeft(230,160);
+Point TopRight(286,162);
+Point BottomLeft(3,342);
+Point BottomRight(245,350);
 
 void callBackFunc2(int event, int x, int y, int flags, void* userdata);
 
@@ -25,7 +25,7 @@ int main(){
 	Size _resize(600, 400);
 
 
-	Mat src = imread("../TrafficExample/Image3.jpg");
+	Mat src = imread("../TrafficExample/sam2.png");
 
 	resize(src, src, _resize);
 
@@ -39,37 +39,6 @@ int main(){
 
 	imshow("ORIGIN", src);
 	setMouseCallback("ORIGIN", callBackFunc2, &src); //Get Mouse Event For knowing Scalar Value.
-
-	vector<Point> rect;
-	rect.push_back(TopLeft);
-	rect.push_back(TopRight);
-	rect.push_back(BottomRight);
-	rect.push_back(BottomLeft);
-
-	double w1 = sqrt(pow(BottomRight.x - BottomLeft.x, 2) + pow(BottomRight.y - BottomLeft.y, 2));
-	double w2 = sqrt(pow(TopRight.x - TopLeft.x, 2) + pow(TopRight.y - TopLeft.y, 2));
-	double h1 = sqrt(pow(TopRight.x - BottomRight.x, 2) + pow(TopRight.y - BottomRight.y, 2));
-	double h2 = sqrt(pow(TopLeft.x - BottomLeft.x, 2) + pow(TopLeft.y - BottomLeft.y, 2));
-
-	double maxWidth = (w1 < w2) ? w2 : w1;
-	double maxLength = (h1 < h2) ? h2 : h1;
-
-	Point2f source[4], out[4];
-	source[0] = Point2f(TopLeft.x, TopLeft.y);
-	source[1] = Point2f(TopRight.x, TopRight.y);
-	source[2] = Point2f(BottomRight.x, BottomRight.y);
-	source[3] = Point2f(BottomLeft.x, BottomLeft.y);
-
-	out[0] = Point2f(0, 0);
-	out[1] = Point2f(maxWidth, 0);
-	out[2] = Point2f(maxWidth, maxLength);
-	out[3] = Point2f(0, maxLength);
-
-	Mat test = getPerspectiveTransform(source, out);
-	Mat output;
-
-	warpPerspective(src, output, test, Size(maxWidth, maxLength));
-	imshow("TEST", output);
 
 	waitKey(0);
 	//while (capture.read(src)){
@@ -96,9 +65,16 @@ int main(){
 void callBackFunc2(int event, int x, int y, int flags, void* userdata){
 	static int counts_number = 1;
 	/* When Mouse Click, Get Scalar Values on Clicked Point */
+	static vector<Point> rect;
 
 	Mat src = *(Mat*)userdata;
 	Mat src2, src3, src4, src5, src6;
+
+	static Mat clear_mat;
+
+	if(counts_number == 1){
+		clear_mat = src.clone();
+	}
 
 	cvtColor(src, src2, CV_BGR2Lab);
 	cvtColor(src, src3, CV_BGR2HSV);
@@ -124,7 +100,62 @@ void callBackFunc2(int event, int x, int y, int flags, void* userdata){
 
 		counts_number++;
 
+		rect.push_back(Point(x,y));
+
+		cout << rect.size() << endl;
+
+		if(rect.size()%4 == 0){
+			Point TopLeft = rect[0];
+			Point TopRight = rect[1];
+			Point BottomLeft = rect[2];
+			Point BottomRight = rect[3];
+
+			double w1 = sqrt(pow(BottomRight.x - BottomLeft.x, 2) + pow(BottomRight.y - BottomLeft.y, 2));
+			double w2 = sqrt(pow(TopRight.x - TopLeft.x, 2) + pow(TopRight.y - TopLeft.y, 2));
+			double h1 = sqrt(pow(TopRight.x - BottomRight.x, 2) + pow(TopRight.y - BottomRight.y, 2));
+			double h2 = sqrt(pow(TopLeft.x - BottomLeft.x, 2) + pow(TopLeft.y - BottomLeft.y, 2));
+
+			double maxWidth = (w1 < w2) ? w2 : w1;
+			double maxLength = (h1 < h2) ? h2 : h1;
+
+			Point2f source[4], out[4];
+			source[0] = Point2f(TopLeft.x, TopLeft.y);
+			source[1] = Point2f(TopRight.x, TopRight.y);
+			source[2] = Point2f(BottomRight.x, BottomRight.y);
+			source[3] = Point2f(BottomLeft.x, BottomLeft.y);
+
+			out[0] = Point2f(0, 0);
+			out[1] = Point2f(maxWidth, 0);
+			out[2] = Point2f(maxWidth, maxLength);
+			out[3] = Point2f(0, maxLength);
+
+			Mat test = getPerspectiveTransform(source, out);
+			Mat output;
+
+			warpPerspective(src, output, test, Size(maxWidth, maxLength));
+			imshow("TEST", output);
+				for(int i = 0 ; i < rect.size(); i++){
+					cout << i << " : " << rect[i] << endl;
+				}
+		}
+
 		break;
+
+	case EVENT_RBUTTONDOWN:
+		rect.clear();
+		counts_number = 1;
+		break;
+
 	}
 
 }
+
+// vector<Vec4i> Line_sort(vector<Vec4i> raw_line){
+//
+// vector<int> line_slope;
+//
+// for(int i =0 ; i < raw_line.size(); i++){
+//
+// 	cout << raw_line << endl;
+//
+// }

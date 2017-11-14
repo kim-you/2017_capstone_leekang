@@ -12,92 +12,174 @@ using namespace cv;
 #define AV_WEIGHT float(0.2)
 #define DIST_SIZE 20
 
-Point TopLeft(523,102);
-Point TopRight(742,100);
-Point BottomLeft(2,262);
-Point BottomRight(827,442);
-
 void callBackFunc2(int event, int x, int y, int flags, void* userdata);
-vector<Vec4i> Line_sort(vector<Vec4i>);
-
+vector<Vec4i> Line_sort(vector<Vec4i> raw_line);
 
 int main(){
 	int key = 0;
 	int frame_rate = 30;
 	Size _resize(600, 400);
 
+	vector<Vec4i> lines;
+	lines.push_back(Vec4i(-3,-7,1,3));
+	lines.push_back(Vec4i(2,2,7,7));
+	lines.push_back(Vec4i(-1,5,1,-5));
+	lines.push_back(Vec4i(1,1,5,5));
+	lines.push_back(Vec4i(-10,127,-1,-3));
 
-  Mat src;
 
-  VideoCapture capture("../TrafficExample/MovingCamera.mp4");
 
-  capture >> src;
+	Line_sort(lines);
 
-  resize(src, src, _resize);
+
+	Mat src = imread("../TrafficExample/Image3.jpg");
+
+	resize(src, src, _resize);
 
 
 	if (!src.data){
 		printf("NO IMAGE\n");
-		return 0;
+		return -1;
 	}
 
 
-while(capture.read(src)){
 
 	imshow("ORIGIN", src);
 	setMouseCallback("ORIGIN", callBackFunc2, &src); //Get Mouse Event For knowing Scalar Value.
 
-	vector<Point> rect;
-	rect.push_back(TopLeft);
-	rect.push_back(TopRight);
-	rect.push_back(BottomRight);
-	rect.push_back(BottomLeft);
 
-	double w1 = sqrt(pow(BottomRight.x - BottomLeft.x, 2) + pow(BottomRight.y - BottomLeft.y, 2));
-	double w2 = sqrt(pow(TopRight.x - TopLeft.x, 2) + pow(TopRight.y - TopLeft.y, 2));
-	double h1 = sqrt(pow(TopRight.x - BottomRight.x, 2) + pow(TopRight.y - BottomRight.y, 2));
-	double h2 = sqrt(pow(TopLeft.x - BottomLeft.x, 2) + pow(TopLeft.y - BottomLeft.y, 2));
+	waitKey(0);
+	//while (capture.read(src)){
 
-	double maxWidth = (w1 < w2) ? w2 : w1;
-	double maxLength = (h1 < h2) ? h2 : h1;
+	//
 
-	Point2f source[4], out[4];
-	source[0] = Point2f(TopLeft.x, TopLeft.y);
-	source[1] = Point2f(TopRight.x, TopRight.y);
-	source[2] = Point2f(BottomRight.x, BottomRight.y);
-	source[3] = Point2f(BottomLeft.x, BottomLeft.y);
+	//	key = waitKey(frame_rate);
 
-	out[0] = Point2f(0, 0);
-	out[1] = Point2f(maxWidth, 0);
-	out[2] = Point2f(maxWidth, maxLength);
-	out[3] = Point2f(0, maxLength);
+	//	if (key == 27 || key == 'q')
+	//		break;
 
-	Mat test = getPerspectiveTransform(source, out);
-	//cout << test << endl;
-	Mat output;
-
-	warpPerspective(src, output, test, Size(maxWidth, maxLength));
-	imshow("TEST", output);
-
-	//waitKey(0);
-
-		key = waitKey(frame_rate);
-
-		if (key == 27 || key == 'q')
-			break;
-
-		if (key == 32){
-			if (frame_rate == FRAMERATE)
-				frame_rate = 0;
-			else if (frame_rate == 0)
-				frame_rate = FRAMERATE;
-		}
-
-  }
+	//	if (key == 32){
+	//		if (frame_rate == FRAMERATE)
+	//			frame_rate = 0;
+	//		else if (frame_rate == 0)
+	//			frame_rate = FRAMERATE;
+	//	}
+	//}
 
 	return 0;
 
 }
+
+
+//Derivative -> y2 - y1 / x2 - x1
+vector<Vec4i> Line_sort(vector<Vec4i> raw_line){
+
+	for(int i = 0 ; i < raw_line.size() ; i ++){
+		cout << raw_line[i] << endl;
+	}
+
+cout << endl;
+
+vector<float> line_slope_pos;
+vector<float> line_slope_neg;
+
+vector<Vec4i> pos_lines;
+vector<Vec4i> neg_lines;
+
+float temp_slope;
+
+	for(int i =0 ; i < raw_line.size(); i++){
+		temp_slope = float(raw_line[i][1] - raw_line[i][3]) / float(raw_line[i][0] - raw_line[i][2]);
+
+		cout << "[" << i << "] " << temp_slope << endl;
+
+		if(temp_slope < 0){
+			neg_lines.push_back(raw_line[i]);
+			line_slope_neg.push_back(temp_slope);
+			cout << "NEGATIVE" << endl;
+		}else{
+			pos_lines.push_back(raw_line[i]);
+			line_slope_pos.push_back(temp_slope);
+			cout << "POSITIVE" << endl;
+		}
+
+	}
+
+	cout << "\nFirst Sort\n" << endl;
+
+	for(int i = 0 ; i < pos_lines.size() ; i ++){
+		cout << "[" << i << "] " << line_slope_pos[i] << endl;
+		cout << "[" << i << "] " << pos_lines[i] << endl;
+	}
+
+	cout << endl;
+
+	for(int i = 0 ; i < neg_lines.size() ; i ++){
+		cout << "[" << i << "] " << line_slope_neg[i] << endl;
+		cout << "[" << i << "] " << neg_lines[i] << endl;
+	}
+
+/*!-   Sorting Algorithm -> Bubble Sort with original array -!*/
+
+float temp;
+Vec4i temp2;
+
+//Positive Line Sort
+	for(int i = 0 ; i < line_slope_pos.size() ; i++){
+		for(int j = 0 ; j < line_slope_pos.size()-(i+1); j++){
+					if(line_slope_pos[j] > line_slope_pos[j+1]){
+						temp = line_slope_pos[j+1];
+						line_slope_pos[j+1] = line_slope_pos[j];
+						line_slope_pos[j] = temp;
+
+						temp2 = pos_lines[j+1];
+						pos_lines[j+1] = pos_lines[j];
+						pos_lines[j] = temp2;
+					}
+		}
+	}
+
+//Negative Line Sort
+	for(int i = 0 ; i < line_slope_neg.size() ; i++){
+		for(int j = 0 ; j < line_slope_neg.size()-(i+1); j++){
+					if(line_slope_neg[j] > line_slope_neg[j+1]){
+						temp = line_slope_neg[j+1];
+						line_slope_neg[j+1] = line_slope_neg[j];
+						line_slope_neg[j] = temp;
+
+						temp2 = neg_lines[j+1];
+						neg_lines[j+1] = neg_lines[j];
+						neg_lines[j] = temp2;
+					}
+		}
+	}
+
+	cout << "\nSecond Sort\n" << endl;
+
+	for(int i = 0 ; i < pos_lines.size() ; i ++){
+		cout << "[" << i << "] " << line_slope_pos[i] << endl;
+		cout << "[" << i << "] " << pos_lines[i] << endl;
+	}
+
+	cout << endl;
+
+	for(int i = 0 ; i < neg_lines.size() ; i ++){
+		cout << "[" << i << "] " << line_slope_neg[i] << endl;
+		cout << "[" << i << "] " << neg_lines[i] << endl;
+	}
+
+	// cout << "\nAfter Sort\n" << endl;
+	//
+	// for(int i = 0 ; i < line_slope.size() ; i ++){
+	// 	cout << "[" << i << "] " << line_slope[i] << endl;
+	// 	cout << "Derv" << raw_line[i] << endl;
+	// }
+
+	return raw_line;
+
+}
+
+
 
 void callBackFunc2(int event, int x, int y, int flags, void* userdata){
 	static int counts_number = 1;
@@ -133,10 +215,4 @@ void callBackFunc2(int event, int x, int y, int flags, void* userdata){
 		break;
 	}
 
-}
-
-vector<Vec4i> Line_sort(vector<Vec4i>){
-
-
-    
 }
