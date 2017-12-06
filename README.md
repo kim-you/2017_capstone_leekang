@@ -1,4 +1,4 @@
-# CALCULATE TRAFFIC CONGESTION VIA CCTV
+# CALCULATE TRAFFIC CONGESTION FROM CCTV VIDEOS
 ###### Capstone project in Handong University with Prof Yi
 
 - - - -  
