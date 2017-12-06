@@ -10,8 +10,8 @@
 ## How To Use?
 
 __main.cpp__ is a main file.  
-In this program, we use ***OPENCV*** (open-source software).   
-Import that header file in 'src/' with cpp files.  
+In this program, we use ***OPENCV VERSION 3*** (open-source software).   
+***Import our header file in 'src/' with cpp files.***    
 And, please check ****FILE PATH****  in ___main.cpp's 33 lines___   
 
 
