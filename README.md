@@ -107,13 +107,10 @@ float threshold_FD = 0.5; // Final threshold to determine foreground (0.0~1.0)
 #### b) Image Comparison for Sensing Rotation, using Distribute Image Comparison.
 ![DIS](ETC/Image/Dist_Histo_result.JPG)
 
-#### c) Draw imaginary map, using optical flow
-![Map](ETC/Image/Imaginary_Map.JPG)   
-
-### d) Detect cars using YOLO algorithm.
+### c) Detect cars using YOLO algorithm.
 ![YOLO](ETC/Image/Detecting_Car.JPG)   
 ###### You can download weight file via this link https://drive.google.com/file/d/0BxrayYHrdwzRV1BacWZoWklDNkU/view?usp=sharing
-
+###### Original YOLOv2 Algorithm, https://github.com/AlexeyAB/darknet
 - - - - 
 
 _Handong Global University. Capstone project with Prof.Yi, Kim you, Lee hansung, Lee taewoo._
