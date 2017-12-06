@@ -30,7 +30,7 @@ int main(void) {
 	//////////////////////////////////////
 
 	/////Parameters for basic setting/////
-	String videoname = "samplevideo/example.mp4"; //
+	String videoname = "traffic.mp4"; //
 	float vertical_size = 360;
 	//////////////////////////////////////
 	

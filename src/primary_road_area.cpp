@@ -43,7 +43,7 @@ Mat calNonedgeArea(Mat src, int windowSize, float stride, float edgeRate) {
 
 Mat findRoadBlob(Mat nonEdgeMap, Mat filtered, float sky_rate, float labLimit, float sigma, float sizeLimit) {
 
-	float largestArea;
+	float largestArea = 0;
 	int largestIndex;
 
 	vector< vector<Point> > contours;
