@@ -80,7 +80,7 @@ float threshold_FD = 0.5; // Final threshold to determine foreground (0.0~1.0)
 ## 2. Calculate Road Congestion
 
 ### Find back-ground image, and check where is the road.
-![Original](ETC/Image/Original.jpg) ![Background](ETC/Image/Background.jpg) ![ROADMAP](ETC/Image/Road_Map2.png)
+![Original](ETC/Image/Original.jpg) ![Background](ETC/Image/Background.jpg) ![ROADMAP](ETC/Image/Road_Map_2.png)
 
 ### Verify the road area & get outer-most lines 
 ![ROAD_AREA](ETC/Image/OpticalMap.png)  ![ROAD_AREA_2](ETC/Image/Outer_line.png)
