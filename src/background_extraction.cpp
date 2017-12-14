@@ -9,7 +9,6 @@ using namespace cv;
 
 Mat get_clear_background(String videoname, int framelimit, Size resolution) {
 
-
 	VideoCapture cap(videoname);
 	Ptr<BackgroundSubtractor> pMOG2;
 	pMOG2 = createBackgroundSubtractorMOG2();
