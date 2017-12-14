@@ -21,7 +21,6 @@ void calcCongestion(vector<double>& congestion, int &segnum, int &trapenum, Mat 
 void output(vector<double>& congestion, bool &graphic_box, bool &cmd_text, Mat &window);
 
 int main(void) {
-
 ////////////////////////////////////////////////////////////////////PARAMETERS//////////////////////////////////////////////////////////////////
 
 	/////Parameters for output/////
