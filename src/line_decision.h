@@ -7,7 +7,7 @@
 using namespace std;
 using namespace cv;
 
-Mat calcVec(String filename, Size resolution, int grid_size, float threshold, Mat road_Map, int check_finish, float size_ratio, float forgive_ratio, float non_ratio);
+Mat calcVec(String &filename, Size &resolution, int &grid_size, double &threshold, Mat &road_Map, int &check_finish, double &size_ratio, double &forgive_ratio, double &non_ratio);
 vector<Vec4i> findRoadLine(Mat roadBlob, Mat filtered);
 vector<Vec4i> externalLine(vector<Vec4i> lines, Size resolution, Mat roadblob);
 vector<Vec4i> extendLine(vector<Vec4i> lines, Size resolution);

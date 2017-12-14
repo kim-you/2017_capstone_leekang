@@ -9,5 +9,5 @@ using namespace cv;
 
 
 float radtodegree_360(float n);
-float radtodegree(float);
-float dist_Points(Point2f, Point2f);
+float radtodegree(float n);
+float dist_Points(Point2f &a, Point2f &b);

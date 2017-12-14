@@ -28,7 +28,6 @@ Mat get_clear_background(String videoname, int framelimit, Size resolution) {
 		Canny(background, canny, 30, 60);
 		current_sum = sum(canny)[0] / 255;
 
-		
 		if (current_sum < min_sum) {
 			min_sum = current_sum;
 			result = background.clone();
@@ -52,6 +51,9 @@ Mat get_clear_background(String videoname, int framelimit, Size resolution) {
 
 		if (timer < 0)
 			stopflag = false;
+
+		imshow("frame", img);
+		waitKey(1);
 	}
 
 	cap.release();

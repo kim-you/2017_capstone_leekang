@@ -26,6 +26,6 @@ float radtodegree(float n) {
 		return temp;
 }
 
-float dist_Points(Point2f a, Point2f b) {
+float dist_Points(Point2f &a, Point2f &b) {
 	return sqrt((a.x - b.x) * (a.x - b.x) + (a.y - b.y)*(a.y - b.y));
 }

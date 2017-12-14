@@ -9,7 +9,7 @@ using namespace std;
 using namespace cv;
 
 
-Mat calcVec(String filename, Size resolution, int grid_size, float threshold, Mat road_Map, int check_finish, float size_ratio, float forgive_ratio, float non_ratio) {
+Mat calcVec(String &filename, Size &resolution, int &grid_size, double &threshold, Mat &road_Map, int &check_finish, double &size_ratio, double &forgive_ratio, double &non_ratio) {
 
 	VideoCapture cap(filename);
 
@@ -66,8 +66,8 @@ Mat calcVec(String filename, Size resolution, int grid_size, float threshold, Ma
 				for (int i = 0; i < x_grids; i++) {
 					if (flownum.at<float>(j, i) == check_finish)
 						continue; //if a cell collect enough data, then skip this cell.
-					const float x = i * grid_size + grid_size / 2;
-					const float y = j * grid_size + grid_size / 2;
+					const double x = i * grid_size + grid_size / 2;
+					const double y = j * grid_size + grid_size / 2;
 					const Point2f flowat = flow.at<Point2f>(y, x);
 					// extract the flow data at the center of cell
 
@@ -93,7 +93,7 @@ Mat calcVec(String filename, Size resolution, int grid_size, float threshold, Ma
 								cout << "percent : " << current << "%" << "( up to " << size_ratio * 100 << "% )" << endl;
 								percentage = current;
 							}
-							if (((float)road_grid_finish / (float)total_road_grid) > size_ratio)
+							if (((double)road_grid_finish / (double)total_road_grid) > size_ratio)
 								stopflag = false;
 							// if number of cells of road are filled specific ratio, finish.
 						}
@@ -104,8 +104,8 @@ Mat calcVec(String filename, Size resolution, int grid_size, float threshold, Ma
 		}
 	}
 	// this part determine the result of cells which did not collect enough data.
-	float semi_check_finish = (float)check_finish * forgive_ratio;
-	float non_finish = (float)check_finish * non_ratio;
+	double semi_check_finish = (double)check_finish * forgive_ratio;
+	double non_finish = (double)check_finish * non_ratio;
 	for (int j = 0; j < y_grids; j++) {
 		for (int i = 0; i < x_grids; i++) {
 			if (flownum.at<float>(j, i) > semi_check_finish) {
@@ -122,10 +122,18 @@ Mat calcVec(String filename, Size resolution, int grid_size, float threshold, Ma
 	return angle_map;
 }
 
-bool comp(const Point2f a, const Point2f b) {
+//bool comp(const Point2f a, const Point2f b) {
+//
+//	if (a.x != b.x) return a.x < b.x;
+//	else if (a.y != b.y) return a.y < b.y;
+//
+//}
 
-	if (a.x != b.x) return a.x < b.x;
-	else if (a.y != b.y) return a.y < b.y;
+bool comp(const Point2f a, const Point2f b) {
+	
+	if (a.x < b.x) return true;
+	else if (a.x == b.x && a.y < b.y) return true;
+	else return false;
 
 }
 
