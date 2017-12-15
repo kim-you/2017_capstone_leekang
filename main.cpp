@@ -200,8 +200,13 @@ int main(void) {
 			resize(frame, frame, resolution);
 
 			///// Foreground extraction compared with background information //////
+			if(weight_edgeang_FD > 0)
 			comp_edgeden(edgeden, grid_size_FD, frame, resolution, mag_ratio_edgeden_FD, BGedgenum, roadMask, Rect(), Mat());
+
+			if(weight_edgeang_FD > 0)
 			comp_edgeangle(edgeang, grid_size_FD, frame, resolution, mag_ratio_edgeangle_FD, histBGangle, roadMask, Rect(), Mat(), Mat());
+
+			if(weight_edgecolorhist_FD > 0)
 			comp_colorhist(colorhist, grid_size_FD, frame, resolution, mag_ratio_edgecolorhist_FD, histBGcolor, roadMask, Rect(), Mat(), Mat());
 			mergeMat(foreground, resolution, edgeden, weight_edgeden_FD, edgeang, weight_edgeang_FD, colorhist, weight_edgecolorhist_FD, grid_size_FD, threshold_FD, Rect(), Mat(), Mat());
 			/////////////////////////////////
@@ -213,6 +218,7 @@ int main(void) {
 			imshow("frame", frame);
 			waitKey(1);
 		}
+
 
 	system("PAUSE");
 	return 0;
